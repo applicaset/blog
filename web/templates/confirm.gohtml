@@ -1,7 +1,7 @@
 {{ define "content" }}
 <p>{{ .Message }}</p>
 <form method="post" action="{{ .ActionURL }}" class="flex flex-wrap gap-2">
-    <button type="submit" class="btn btn-danger">{{ .Submit }}</button>
-    <a href="{{ .CancelURL }}" class="btn btn-secondary">Cancel</a>
+    <button type="submit" class="as-button is-danger">{{ .Submit }}</button>
+    <a href="{{ .CancelURL }}" class="as-button variant-outlined">Cancel</a>
 </form>
 {{ end }}

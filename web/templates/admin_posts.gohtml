@@ -1,11 +1,11 @@
 {{ define "content" }}
 <div class="flex flex-wrap items-center justify-between gap-4">
-    {{ if not .ShowingEveryone }}<p class="hint">These are your own posts.</p>{{ end }}
-    <a href="/admin/posts/new" class="btn ml-auto">{{ template "mdi-plus.svg" }}New post</a>
+    {{ if not .ShowingEveryone }}<p class="as-hint">These are your own posts.</p>{{ end }}
+    <a href="/admin/posts/new" class="as-button ml-auto">{{ template "mdi-plus.svg" }}New post</a>
 </div>
 {{ if .Posts }}
     <div class="overflow-x-auto">
-        <table class="table">
+        <table class="as-table">
             <thead><tr><th>Title</th><th>Status</th><th>Created</th><th></th></tr></thead>
             <tbody>
             {{ range .Posts }}
@@ -13,13 +13,13 @@
                     <td><a href="/posts/{{ .ID }}">{{ .Title }}</a></td>
                     <td>{{ template "status-badge" .Status }}</td>
                     <td class="whitespace-nowrap text-muted"><time datetime="{{ .CreatedAt.Format "2006-01-02" }}">{{ .CreatedAt.Format "2 January 2006" }}</time></td>
-                    <td class="text-right"><a href="/admin/posts/{{ .ID }}/edit" class="btn btn-secondary btn-sm">Edit</a></td>
+                    <td class="text-right"><a href="/admin/posts/{{ .ID }}/edit" class="as-button variant-outlined size-sm">Edit</a></td>
                 </tr>
             {{ end }}
             </tbody>
         </table>
     </div>
 {{ else }}
-    <p class="hint">There are no posts yet.</p>
+    <p class="as-hint">There are no posts yet.</p>
 {{ end }}
 {{ end }}

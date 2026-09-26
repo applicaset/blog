@@ -1,15 +1,15 @@
 {{ define "content" }}
 <dl class="grid grid-cols-2 gap-4 sm:grid-cols-4">
     {{ if .CanManagePosts }}
-        <div class="card"><dt class="text-sm text-muted">Published</dt><dd class="mt-1 text-2xl font-semibold">{{ .Published }}</dd></div>
-        <div class="card"><dt class="text-sm text-muted">Drafts</dt><dd class="mt-1 text-2xl font-semibold">{{ .Drafts }}</dd></div>
-        <div class="card"><dt class="text-sm text-muted">Archived</dt><dd class="mt-1 text-2xl font-semibold">{{ .Archived }}</dd></div>
+        <div class="as-card"><dt class="text-sm text-muted">Published</dt><dd class="mt-1 text-2xl font-semibold">{{ .Published }}</dd></div>
+        <div class="as-card"><dt class="text-sm text-muted">Drafts</dt><dd class="mt-1 text-2xl font-semibold">{{ .Drafts }}</dd></div>
+        <div class="as-card"><dt class="text-sm text-muted">Archived</dt><dd class="mt-1 text-2xl font-semibold">{{ .Archived }}</dd></div>
     {{ end }}
     {{ if .CanManageUsers }}
-        <div class="card"><dt class="text-sm text-muted">Users</dt><dd class="mt-1 text-2xl font-semibold">{{ .Users }}</dd></div>
+        <div class="as-card"><dt class="text-sm text-muted">Users</dt><dd class="mt-1 text-2xl font-semibold">{{ .Users }}</dd></div>
     {{ end }}
 </dl>
-{{ if and .CanManagePosts (not .ShowingEveryone) }}<p class="hint -mt-3">These numbers cover your own posts.</p>{{ end }}
+{{ if and .CanManagePosts (not .ShowingEveryone) }}<p class="as-hint -mt-3">These numbers cover your own posts.</p>{{ end }}
 
 {{ if .CanManagePosts }}
     <section class="flex flex-col gap-3">
@@ -23,12 +23,12 @@
                     <li class="flex items-center gap-3 py-3">
                         <a href="/posts/{{ .ID }}" class="min-w-0 flex-1 truncate">{{ .Title }}</a>
                         {{ template "status-badge" .Status }}
-                        <a href="/admin/posts/{{ .ID }}/edit" class="btn btn-secondary btn-sm">Edit</a>
+                        <a href="/admin/posts/{{ .ID }}/edit" class="as-button variant-outlined size-sm">Edit</a>
                     </li>
                 {{ end }}
             </ul>
         {{ else }}
-            <p class="hint">There are no posts yet.</p>
+            <p class="as-hint">There are no posts yet.</p>
         {{ end }}
     </section>
 {{ end }}

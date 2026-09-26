@@ -25,16 +25,16 @@
 </header>
 <main class="mx-auto flex max-w-2xl flex-col gap-6 px-4 py-10">
     {{ with .AdminTabs }}
-        <nav aria-label="Administration" class="tabs">
-            {{ range . }}<a href="{{ .URL }}" class="tab"{{ if .Active }} aria-current="page"{{ end }}>{{ .Label }}</a>{{ end }}
+        <nav aria-label="Administration" class="as-tabs">
+            {{ range . }}<a href="{{ .URL }}" class="as-tab"{{ if .Active }} aria-current="page"{{ end }}>{{ .Label }}</a>{{ end }}
         </nav>
     {{ end }}
     <h1>{{ .Title }}</h1>
-    {{ if .ErrorMessage }}<p role="alert" class="alert alert-danger">{{ .ErrorMessage }}</p>{{ end }}
-    {{ if .Notice }}<p role="status" class="alert alert-success">{{ .Notice }}</p>{{ end }}
+    {{ if .ErrorMessage }}<p role="alert" class="as-alert variant-danger">{{ .ErrorMessage }}</p>{{ end }}
+    {{ if .Notice }}<p role="status" class="as-alert variant-success">{{ .Notice }}</p>{{ end }}
     {{ template "content" .Content }}
 </main>
 </body>
 </html>
 
-{{ define "status-badge" }}<span class="badge {{ if eq . "published" }}badge-success{{ else if eq . "draft" }}badge-info{{ end }}">{{ . }}</span>{{ end }}
+{{ define "status-badge" }}<span class="as-badge {{ if eq . "published" }}variant-success{{ else if eq . "draft" }}variant-info{{ end }}">{{ . }}</span>{{ end }}

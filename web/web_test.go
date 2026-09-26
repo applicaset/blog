@@ -301,10 +301,10 @@ func TestDashboardShowsOnlyTheSectionsTheUserMayOpen(t *testing.T) {
 	assert.Contains(
 		t,
 		body,
-		`<a href="/admin/dashboard" class="tab" aria-current="page">Dashboard</a>`,
+		`<a href="/admin/dashboard" class="as-tab" aria-current="page">Dashboard</a>`,
 	)
-	assert.Contains(t, body, `<a href="/admin/posts" class="tab">Posts</a>`)
-	assert.NotContains(t, body, `href="/admin/users" class="tab"`)
+	assert.Contains(t, body, `<a href="/admin/posts" class="as-tab">Posts</a>`)
+	assert.NotContains(t, body, `href="/admin/users" class="as-tab"`)
 	assert.Contains(t, body, "Recent posts")
 }
 
@@ -314,7 +314,7 @@ func TestDashboardIsForbiddenWithoutAnyAdminPermission(t *testing.T) {
 	response := h.request(t, http.MethodGet, "/admin/dashboard", graceName, nil)
 
 	assert.Equal(t, http.StatusForbidden, response.Code)
-	assert.NotContains(t, response.Body.String(), `class="tabs"`)
+	assert.NotContains(t, response.Body.String(), `class="as-tabs"`)
 }
 
 // Asking first must not act: the confirmation page is a GET and deletes nothing.

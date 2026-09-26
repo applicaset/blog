@@ -1,14 +1,14 @@
 {{ define "content" }}
-{{ if .CanCreate }}<div class="flex justify-end"><a href="{{ .NewUserURL }}" class="btn">{{ template "mdi-plus.svg" }}New user</a></div>{{ end }}
+{{ if .CanCreate }}<div class="flex justify-end"><a href="{{ .NewUserURL }}" class="as-button">{{ template "mdi-plus.svg" }}New user</a></div>{{ end }}
 <div class="overflow-x-auto">
-    <table class="table">
+    <table class="as-table">
         <thead><tr><th>Username</th><th>Name</th><th></th></tr></thead>
         <tbody>
         {{ range .Users }}
             <tr>
                 <td>{{ .Username }}</td>
                 <td class="text-muted">{{ .Name }}</td>
-                <td class="text-right"><a href="/admin/users/{{ .ID }}" class="btn btn-secondary btn-sm">Roles</a></td>
+                <td class="text-right"><a href="/admin/users/{{ .ID }}" class="as-button variant-outlined size-sm">Roles</a></td>
             </tr>
         {{ end }}
         </tbody>
