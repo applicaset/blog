@@ -1,26 +1,28 @@
 {{ define "content" }}
-<p>Username: {{ .User.Username }}</p>
-<p>Name: {{ .User.Name }}</p>
-{{ if .IsSelf }}<p>This is your own account.</p>{{ end }}
+<dl class="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 text-sm">
+    <dt class="text-muted">Username</dt><dd>{{ .User.Username }}</dd>
+    <dt class="text-muted">Name</dt><dd>{{ .User.Name }}</dd>
+</dl>
+{{ if .IsSelf }}<p class="alert alert-info">This is your own account.</p>{{ end }}
 
 {{ if .CanAssign }}
-    <form method="post" action="/admin/users/{{ .User.ID }}/roles">
-        {{ $held := .HeldRoles }}
-        {{ range .AllRoles }}
-            <p><label>
-                <input type="checkbox" name="roles" value="{{ . }}" {{ if has $held . }}checked{{ end }}>
-                {{ . }}
-            </label></p>
-        {{ end }}
-        <p><button type="submit">Save roles</button></p>
+    <form method="post" action="/admin/users/{{ .User.ID }}/roles" class="flex flex-col gap-4">
+        <fieldset class="flex flex-col gap-3">
+            <legend class="mb-3 text-sm font-medium">Roles</legend>
+            {{ $held := .HeldRoles }}
+            {{ range .AllRoles }}
+                <label class="check"><input type="checkbox" name="roles" value="{{ . }}" {{ if has $held . }}checked{{ end }}> {{ . }}</label>
+            {{ end }}
+        </fieldset>
+        <div><button type="submit" class="btn">Save roles</button></div>
     </form>
 {{ else }}
-    <p>Roles: {{ range .HeldRoles }}{{ . }} {{ else }}none{{ end }}</p>
+    <p class="text-sm"><span class="text-muted">Roles:</span> {{ range .HeldRoles }}{{ . }} {{ else }}none{{ end }}</p>
 {{ end }}
 {{ if .CanDelete }}
-    <form method="post" action="/admin/users/{{ .User.ID }}/delete">
-        <button type="submit">Delete this account</button>
+    <form method="post" action="/admin/users/{{ .User.ID }}/delete" class="border-t border-border pt-6">
+        <button type="submit" class="btn btn-danger">Delete this account</button>
     </form>
 {{ end }}
-<p><a href="/admin/users">Back to users</a></p>
+<p class="hint"><a href="/admin/users">Back to users</a></p>
 {{ end }}

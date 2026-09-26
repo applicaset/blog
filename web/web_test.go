@@ -1,10 +1,12 @@
 package web_test
 
 import (
+	"html"
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -264,4 +266,17 @@ func TestDeletingYourOwnAccountIsRefused(t *testing.T) {
 
 	assert.Equal(t, http.StatusBadRequest, response.Code)
 	assert.Empty(t, h.auth.deleted)
+}
+
+func TestPagesLinkTheStylesheet(t *testing.T) {
+	h := newHarness(t)
+
+	page := h.request(t, http.MethodGet, "/", "", nil)
+	href := regexp.MustCompile(`<link rel="stylesheet" href="([^"]+)">`).
+		FindStringSubmatch(page.Body.String())
+	require.NotNil(t, href, "the page must link a stylesheet")
+
+	stylesheet := h.request(t, http.MethodGet, html.UnescapeString(href[1]), "", nil)
+	require.Equal(t, http.StatusOK, stylesheet.Code)
+	assert.Equal(t, "text/css; charset=utf-8", stylesheet.Header().Get("Content-Type"))
 }

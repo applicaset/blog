@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"strings"
 	"testing"
 	"time"
 
@@ -25,8 +26,10 @@ import (
 )
 
 // identityPaths are the paths the gateway sends to the identity service. They are the same list
-// the Caddyfile carries, and they are exact matches rather than prefixes.
+// the Caddyfile carries, and they are exact matches rather than prefixes, apart from identityPrefix.
 var identityPaths = []string{"/setup", "/login", "/logout", "/register", "/password"}
+
+const identityPrefix = "/auth/"
 
 // newSplitHarness boots the four services behind a proxy carrying the gateway's routing, so the
 // browser sees one origin as it does in compose. They share one SQLite file, which is not how they
@@ -62,7 +65,8 @@ func newGateway(t *testing.T, authURL, webURL string) http.Handler {
 	site := newProxy(t, webURL)
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if slices.Contains(identityPaths, r.URL.Path) {
+		if slices.Contains(identityPaths, r.URL.Path) ||
+			strings.HasPrefix(r.URL.Path, identityPrefix) {
 			identity.ServeHTTP(w, r)
 
 			return

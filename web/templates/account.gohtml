@@ -1,8 +1,8 @@
 {{ define "content" }}
-<form method="post" action="/account">
-    <p><label>Username <input name="username" value="{{ .User.Username }}" required autocomplete="username"></label></p>
-    <p><label>Display name <input name="name" value="{{ .User.Name }}" autocomplete="name"></label></p>
-    <p><button type="submit">Save</button></p>
+<form method="post" action="/account" class="flex max-w-sm flex-col gap-5">
+    <label class="field">Username <input class="input" name="username" value="{{ .User.Username }}" required autocomplete="username"></label>
+    <label class="field">Display name <input class="input" name="name" value="{{ .User.Name }}" autocomplete="name"></label>
+    <div><button type="submit" class="btn">Save</button></div>
 </form>
-<p><a href="{{ .PasswordURL }}">Change your password</a></p>
+<p class="hint"><a href="{{ .PasswordURL }}">Change your password</a></p>
 {{ end }}

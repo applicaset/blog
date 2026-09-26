@@ -8,10 +8,17 @@ import (
 	"log/slog"
 	"net/http"
 	"slices"
+
+	"github.com/buildset/buildset/pkg/asset"
 )
 
 //go:embed templates/*.gohtml
 var templateFiles embed.FS
+
+//go:embed static/style.min.css
+var stylesheetContent []byte
+
+var stylesheet = asset.New("/static/style.min.css", "text/css; charset=utf-8", stylesheetContent)
 
 // Listing every page keeps a typo in a handler a startup problem rather than a runtime one.
 var pageNames = []string{
@@ -28,16 +35,17 @@ var pageNames = []string{
 
 // layoutData is what every template receives. Handlers fill Content with the page's own data.
 type layoutData struct {
-	SiteTitle    string
-	Title        string
-	CurrentUser  *User
-	LoginURL     string
-	LogoutURL    string
-	PasswordURL  string
-	CanSeeAdmin  bool
-	ErrorMessage string
-	Notice       string
-	Content      any
+	SiteTitle     string
+	Title         string
+	StylesheetURL string
+	CurrentUser   *User
+	LoginURL      string
+	LogoutURL     string
+	PasswordURL   string
+	CanSeeAdmin   bool
+	ErrorMessage  string
+	Notice        string
+	Content       any
 }
 
 // templateFunctions are the few helpers the pages need that html/template does not provide.
@@ -67,12 +75,13 @@ func (s *Server) newLayoutData(r *http.Request, title string) layoutData {
 	user, _ := userFromContext(r.Context())
 
 	data := layoutData{
-		SiteTitle:   s.config.SiteTitle,
-		Title:       title,
-		CurrentUser: user,
-		LoginURL:    s.deps.Auth.LoginURL(r.URL.RequestURI()),
-		LogoutURL:   s.deps.Auth.LogoutURL(),
-		PasswordURL: s.deps.Auth.PasswordURL(),
+		SiteTitle:     s.config.SiteTitle,
+		Title:         title,
+		StylesheetURL: stylesheet.URL,
+		CurrentUser:   user,
+		LoginURL:      s.deps.Auth.LoginURL(r.URL.RequestURI()),
+		LogoutURL:     s.deps.Auth.LogoutURL(),
+		PasswordURL:   s.deps.Auth.PasswordURL(),
 	}
 
 	if user != nil {

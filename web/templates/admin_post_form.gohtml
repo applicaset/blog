@@ -1,21 +1,25 @@
 {{ define "content" }}
-<form method="post" action="{{ if .Editing }}/admin/posts/{{ .Post.ID }}{{ else }}/admin/posts{{ end }}">
-    <p><label>Title <input name="title" value="{{ .Post.Title }}" required autofocus maxlength="200"></label></p>
-    <p><label>Body <textarea name="body" rows="20" cols="80">{{ .Post.Body }}</textarea></label></p>
-    <p>Plain text. A blank line starts a new paragraph.</p>
-    <p><button type="submit">{{ if .Editing }}Save{{ else }}Create draft{{ end }}</button></p>
+<form method="post" action="{{ if .Editing }}/admin/posts/{{ .Post.ID }}{{ else }}/admin/posts{{ end }}" class="flex flex-col gap-5">
+    <label class="field">Title <input class="input" name="title" value="{{ .Post.Title }}" required autofocus maxlength="200"></label>
+    <label class="field">Body <textarea class="input leading-relaxed" name="body" rows="20">{{ .Post.Body }}</textarea></label>
+    <p class="hint -mt-3">Plain text. A blank line starts a new paragraph.</p>
+    <div><button type="submit" class="btn">{{ if .Editing }}Save{{ else }}Create draft{{ end }}</button></div>
 </form>
 
 {{ if .Editing }}
-    <p>Status: {{ .Post.Status }}</p>
-    {{ range .Statuses }}
-        <form method="post" action="/admin/posts/{{ $.Post.ID }}/status">
-            <input type="hidden" name="status" value="{{ . }}">
-            <button type="submit">Move to {{ . }}</button>
-        </form>
-    {{ end }}
-    <form method="post" action="/admin/posts/{{ .Post.ID }}/delete">
-        <button type="submit">Delete this post</button>
-    </form>
+    <section class="flex flex-col gap-4 border-t border-border pt-6">
+        <p class="text-sm">Status: <span class="font-medium">{{ .Post.Status }}</span></p>
+        <div class="flex flex-wrap gap-2">
+            {{ range .Statuses }}
+                <form method="post" action="/admin/posts/{{ $.Post.ID }}/status">
+                    <input type="hidden" name="status" value="{{ . }}">
+                    <button type="submit" class="btn btn-secondary">Move to {{ . }}</button>
+                </form>
+            {{ end }}
+            <form method="post" action="/admin/posts/{{ .Post.ID }}/delete">
+                <button type="submit" class="btn btn-danger">Delete this post</button>
+            </form>
+        </div>
+    </section>
 {{ end }}
 {{ end }}

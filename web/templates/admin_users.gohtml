@@ -1,15 +1,17 @@
 {{ define "content" }}
-{{ if .CanCreate }}<p><a href="{{ .RegisterURL }}">Add a user</a></p>{{ end }}
-<table>
-    <thead><tr><th>Username</th><th>Name</th><th></th></tr></thead>
-    <tbody>
-    {{ range .Users }}
-        <tr>
-            <td>{{ .Username }}</td>
-            <td>{{ .Name }}</td>
-            <td><a href="/admin/users/{{ .ID }}">Roles</a></td>
-        </tr>
-    {{ end }}
-    </tbody>
-</table>
+{{ if .CanCreate }}<div><a href="{{ .RegisterURL }}" class="btn">Add a user</a></div>{{ end }}
+<div class="overflow-x-auto">
+    <table class="table">
+        <thead><tr><th>Username</th><th>Name</th><th></th></tr></thead>
+        <tbody>
+        {{ range .Users }}
+            <tr>
+                <td>{{ .Username }}</td>
+                <td class="text-muted">{{ .Name }}</td>
+                <td class="text-right"><a href="/admin/users/{{ .ID }}">Roles</a></td>
+            </tr>
+        {{ end }}
+        </tbody>
+    </table>
+</div>
 {{ end }}

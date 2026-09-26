@@ -4,26 +4,29 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ .Title }}</title>
+    <link rel="stylesheet" href="{{ .StylesheetURL }}">
 </head>
 <body>
-<header>
-    <p><a href="/">{{ .SiteTitle }}</a></p>
-    <nav>
-        {{ if .CurrentUser }}
-            <span>Signed in as {{ with .CurrentUser.Name }}{{ . }}{{ else }}{{ .CurrentUser.Username }}{{ end }}</span>
-            {{ if .CanSeeAdmin }}<a href="/admin">Admin</a>{{ end }}
-            <a href="/account">Account</a>
-            <a href="{{ .PasswordURL }}">Password</a>
-            <form method="post" action="{{ .LogoutURL }}"><button type="submit">Sign out</button></form>
-        {{ else }}
-            <a href="{{ .LoginURL }}">Sign in</a>
-        {{ end }}
-    </nav>
+<header class="border-b border-border">
+    <div class="mx-auto flex max-w-2xl flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 py-4">
+        <p><a href="/" class="font-semibold no-underline">{{ .SiteTitle }}</a></p>
+        <nav class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted [&_a]:no-underline [&_a:hover]:text-fg">
+            {{ if .CurrentUser }}
+                <span class="hidden sm:inline">Signed in as {{ with .CurrentUser.Name }}{{ . }}{{ else }}{{ .CurrentUser.Username }}{{ end }}</span>
+                {{ if .CanSeeAdmin }}<a href="/admin">Admin</a>{{ end }}
+                <a href="/account">Account</a>
+                <a href="{{ .PasswordURL }}">Password</a>
+                <form method="post" action="{{ .LogoutURL }}"><button type="submit" class="btn-link">Sign out</button></form>
+            {{ else }}
+                <a href="{{ .LoginURL }}">Sign in</a>
+            {{ end }}
+        </nav>
+    </div>
 </header>
-<main>
+<main class="mx-auto flex max-w-2xl flex-col gap-6 px-4 py-10">
     <h1>{{ .Title }}</h1>
-    {{ if .ErrorMessage }}<p role="alert"><strong>{{ .ErrorMessage }}</strong></p>{{ end }}
-    {{ if .Notice }}<p role="status">{{ .Notice }}</p>{{ end }}
+    {{ if .ErrorMessage }}<p role="alert" class="alert alert-danger">{{ .ErrorMessage }}</p>{{ end }}
+    {{ if .Notice }}<p role="status" class="alert alert-success">{{ .Notice }}</p>{{ end }}
     {{ template "content" .Content }}
 </main>
 </body>

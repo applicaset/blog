@@ -62,6 +62,15 @@ func New(deps Dependencies, config Config, logger *slog.Logger) (*Server, error)
 
 // Handler returns the site, wrapped in its session middleware.
 func (s *Server) Handler() http.Handler {
+	// The stylesheet stays outside the session middleware, which would ask auth about every request.
+	root := http.NewServeMux()
+	root.Handle("GET "+stylesheet.Path, stylesheet)
+	root.Handle("/", s.withSession(s.pages()))
+
+	return root
+}
+
+func (s *Server) pages() http.Handler {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("GET /{$}", s.index)
@@ -85,7 +94,7 @@ func (s *Server) Handler() http.Handler {
 	// Anything this mux does not recognize is a missing page, rendered in the site's layout.
 	mux.HandleFunc("/", s.notFound)
 
-	return s.withSession(mux)
+	return mux
 }
 
 // parseForm bounds the request body before reading it.
