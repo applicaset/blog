@@ -9,8 +9,8 @@ import (
 type adminUsersContent struct {
 	Users []User
 	// CanCreate controls a link to the identity service's form; this site renders no password field.
-	CanCreate   bool
-	RegisterURL string
+	CanCreate  bool
+	NewUserURL string
 }
 
 type adminUserContent struct {
@@ -49,9 +49,9 @@ func (s *Server) adminUsers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data.Content = adminUsersContent{
-		Users:       users,
-		CanCreate:   canCreate,
-		RegisterURL: s.deps.Auth.RegisterURL(),
+		Users:      users,
+		CanCreate:  canCreate,
+		NewUserURL: s.deps.Auth.NewUserURL(),
 	}
 
 	s.render(w, r, http.StatusOK, "admin_users.gohtml", data)
@@ -226,6 +226,29 @@ func (s *Server) buildUserContent(
 		CanDelete: canDelete && !isSelf,
 		IsSelf:    isSelf,
 	}, nil
+}
+
+func (s *Server) confirmDeleteUser(w http.ResponseWriter, r *http.Request) {
+	viewer, subject, ok := s.authorizeUser(w, r, ActionUserDelete)
+	if !ok {
+		return
+	}
+
+	if subject.Ref == viewer.Ref {
+		s.renderError(w, r, http.StatusBadRequest, "You cannot delete your own account here.")
+
+		return
+	}
+
+	data := s.newLayoutData(r, "Delete account")
+	data.Content = confirmContent{
+		Message:   "The account " + subject.Username + " will be deleted. This cannot be undone.",
+		ActionURL: "/admin/users/" + subject.ID + "/delete",
+		Submit:    "Delete",
+		CancelURL: "/admin/users/" + subject.ID,
+	}
+
+	s.render(w, r, http.StatusOK, "confirm.gohtml", data)
 }
 
 func (s *Server) deleteUser(w http.ResponseWriter, r *http.Request) {

@@ -8,11 +8,12 @@ import (
 	"log/slog"
 	"net/http"
 	"slices"
+	"strings"
 
 	"github.com/buildset/buildset/pkg/asset"
 )
 
-//go:embed templates/*.gohtml
+//go:embed templates/*.gohtml templates/icons/*.svg
 var templateFiles embed.FS
 
 //go:embed static/style.min.css
@@ -26,11 +27,20 @@ var pageNames = []string{
 	"post.gohtml",
 	"account.gohtml",
 	"error.gohtml",
-	"admin.gohtml",
+	"admin_dashboard.gohtml",
 	"admin_posts.gohtml",
 	"admin_post_form.gohtml",
 	"admin_users.gohtml",
 	"admin_user.gohtml",
+	"confirm.gohtml",
+}
+
+// confirmContent asks before an action that cannot be undone.
+type confirmContent struct {
+	Message   string
+	ActionURL string
+	Submit    string
+	CancelURL string
 }
 
 // layoutData is what every template receives. Handlers fill Content with the page's own data.
@@ -43,6 +53,7 @@ type layoutData struct {
 	LogoutURL     string
 	PasswordURL   string
 	CanSeeAdmin   bool
+	AdminTabs     []adminTab
 	ErrorMessage  string
 	Notice        string
 	Content       any
@@ -50,7 +61,8 @@ type layoutData struct {
 
 // templateFunctions are the few helpers the pages need that html/template does not provide.
 var templateFunctions = template.FuncMap{
-	"has": slices.Contains[[]string, string],
+	"has":             slices.Contains[[]string, string],
+	"transitionLabel": func(status string) string { return transitionLabels[status] },
 }
 
 func parseTemplates() (map[string]*template.Template, error) {
@@ -59,7 +71,7 @@ func parseTemplates() (map[string]*template.Template, error) {
 	for _, name := range pageNames {
 		page, err := template.New(name).
 			Funcs(templateFunctions).
-			ParseFS(templateFiles, "templates/layout.gohtml", "templates/"+name)
+			ParseFS(templateFiles, "templates/layout.gohtml", "templates/icons/*.svg", "templates/"+name)
 		if err != nil {
 			return nil, fmt.Errorf("parse template %s: %w", name, err)
 		}
@@ -92,6 +104,10 @@ func (s *Server) newLayoutData(r *http.Request, title string) layoutData {
 		}
 
 		data.CanSeeAdmin = allowed
+
+		if strings.HasPrefix(r.URL.Path, adminPathPrefix) {
+			data.AdminTabs = s.adminTabs(r, user, allowed)
+		}
 	}
 
 	return data

@@ -16,7 +16,7 @@
                 {{ if .CanSeeAdmin }}<a href="/admin">Admin</a>{{ end }}
                 <a href="/account">Account</a>
                 <a href="{{ .PasswordURL }}">Password</a>
-                <form method="post" action="{{ .LogoutURL }}"><button type="submit" class="btn-link">Sign out</button></form>
+                <a href="{{ .LogoutURL }}">Sign out</a>
             {{ else }}
                 <a href="{{ .LoginURL }}">Sign in</a>
             {{ end }}
@@ -24,6 +24,11 @@
     </div>
 </header>
 <main class="mx-auto flex max-w-2xl flex-col gap-6 px-4 py-10">
+    {{ with .AdminTabs }}
+        <nav aria-label="Administration" class="tabs">
+            {{ range . }}<a href="{{ .URL }}" class="tab"{{ if .Active }} aria-current="page"{{ end }}>{{ .Label }}</a>{{ end }}
+        </nav>
+    {{ end }}
     <h1>{{ .Title }}</h1>
     {{ if .ErrorMessage }}<p role="alert" class="alert alert-danger">{{ .ErrorMessage }}</p>{{ end }}
     {{ if .Notice }}<p role="status" class="alert alert-success">{{ .Notice }}</p>{{ end }}
@@ -31,3 +36,5 @@
 </main>
 </body>
 </html>
+
+{{ define "status-badge" }}<span class="badge {{ if eq . "published" }}badge-success{{ else if eq . "draft" }}badge-info{{ end }}">{{ . }}</span>{{ end }}

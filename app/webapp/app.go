@@ -86,7 +86,7 @@ func loadURLs() remote.URLs {
 		Login:    env.GetString("AUTH_LOGIN_PATH", defaults.Login),
 		Logout:   env.GetString("AUTH_LOGOUT_PATH", defaults.Logout),
 		Password: env.GetString("AUTH_PASSWORD_PATH", defaults.Password),
-		Register: env.GetString("AUTH_REGISTER_PATH", defaults.Register),
+		NewUser:  env.GetString("AUTH_NEW_USER_PATH", defaults.NewUser),
 	}
 }
 

@@ -79,16 +79,19 @@ func (s *Server) pages() http.Handler {
 	mux.HandleFunc("POST /account", s.accountSubmit)
 
 	mux.HandleFunc("GET /admin", s.adminIndex)
+	mux.HandleFunc("GET "+dashboardPath, s.adminDashboard)
 	mux.HandleFunc("GET /admin/posts", s.adminPosts)
 	mux.HandleFunc("GET /admin/posts/new", s.newPostForm)
 	mux.HandleFunc("POST /admin/posts", s.createPost)
 	mux.HandleFunc("GET /admin/posts/{id}/edit", s.editPostForm)
 	mux.HandleFunc("POST /admin/posts/{id}", s.updatePost)
 	mux.HandleFunc("POST /admin/posts/{id}/status", s.setPostStatus)
+	mux.HandleFunc("GET /admin/posts/{id}/delete", s.confirmDeletePost)
 	mux.HandleFunc("POST /admin/posts/{id}/delete", s.deletePost)
 	mux.HandleFunc("GET /admin/users", s.adminUsers)
 	mux.HandleFunc("GET /admin/users/{id}", s.adminUser)
 	mux.HandleFunc("POST /admin/users/{id}/roles", s.setUserRoles)
+	mux.HandleFunc("GET /admin/users/{id}/delete", s.confirmDeleteUser)
 	mux.HandleFunc("POST /admin/users/{id}/delete", s.deleteUser)
 
 	// Anything this mux does not recognize is a missing page, rendered in the site's layout.

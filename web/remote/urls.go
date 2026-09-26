@@ -13,7 +13,7 @@ type URLs struct {
 	Login    string
 	Logout   string
 	Password string
-	Register string
+	NewUser  string
 }
 
 // DefaultURLs are the paths the identity service serves.
@@ -22,7 +22,7 @@ func DefaultURLs() URLs {
 		Login:    "/login",
 		Logout:   "/logout",
 		Password: "/password",
-		Register: "/register",
+		NewUser:  "/users/new",
 	}
 }
 
@@ -39,4 +39,4 @@ func (u URLs) LoginURL(next string) string {
 
 func (u URLs) LogoutURL() string   { return u.Logout }
 func (u URLs) PasswordURL() string { return u.Password }
-func (u URLs) RegisterURL() string { return u.Register }
+func (u URLs) NewUserURL() string  { return u.NewUser }

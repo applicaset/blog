@@ -27,7 +27,7 @@ import (
 
 // identityPaths are the paths the gateway sends to the identity service. They are the same list
 // the Caddyfile carries, and they are exact matches rather than prefixes, apart from identityPrefix.
-var identityPaths = []string{"/setup", "/login", "/logout", "/register", "/password"}
+var identityPaths = []string{"/setup", "/login", "/logout", "/register", "/users/new", "/password"}
 
 const identityPrefix = "/auth/"
 

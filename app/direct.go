@@ -92,7 +92,7 @@ func (a directAuth) SetupOpen(ctx context.Context) (bool, error) {
 func (a directAuth) LoginURL(next string) string { return a.pages.LoginURL(next) }
 func (a directAuth) LogoutURL() string           { return a.pages.LogoutURL() }
 func (a directAuth) PasswordURL() string         { return a.pages.PasswordURL() }
-func (a directAuth) RegisterURL() string         { return a.pages.RegisterURL() }
+func (a directAuth) NewUserURL() string          { return a.pages.NewUserURL() }
 
 type directAuthz struct {
 	service *authz.Service

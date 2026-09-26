@@ -77,7 +77,7 @@ func (a *Auth) SetupOpen(ctx context.Context) (bool, error) {
 func (a *Auth) LoginURL(next string) string { return a.urls.LoginURL(next) }
 func (a *Auth) LogoutURL() string           { return a.urls.LogoutURL() }
 func (a *Auth) PasswordURL() string         { return a.urls.PasswordURL() }
-func (a *Auth) RegisterURL() string         { return a.urls.RegisterURL() }
+func (a *Auth) NewUserURL() string          { return a.urls.NewUserURL() }
 
 func toWebUser(user authapi.User) *web.User {
 	return &web.User{

@@ -1,5 +1,5 @@
 {{ define "content" }}
-{{ if .CanCreate }}<div><a href="{{ .RegisterURL }}" class="btn">Add a user</a></div>{{ end }}
+{{ if .CanCreate }}<div class="flex justify-end"><a href="{{ .NewUserURL }}" class="btn">{{ template "mdi-plus.svg" }}New user</a></div>{{ end }}
 <div class="overflow-x-auto">
     <table class="table">
         <thead><tr><th>Username</th><th>Name</th><th></th></tr></thead>
@@ -8,7 +8,7 @@
             <tr>
                 <td>{{ .Username }}</td>
                 <td class="text-muted">{{ .Name }}</td>
-                <td class="text-right"><a href="/admin/users/{{ .ID }}">Roles</a></td>
+                <td class="text-right"><a href="/admin/users/{{ .ID }}" class="btn btn-secondary btn-sm">Roles</a></td>
             </tr>
         {{ end }}
         </tbody>

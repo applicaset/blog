@@ -61,8 +61,8 @@ type Auth interface {
 	DeleteUser(ctx context.Context, userRef string) error
 	SetupOpen(ctx context.Context) (bool, error)
 
-	// RegisterURL is the identity service's form; this site never renders one.
-	RegisterURL() string
+	// NewUserURL is the identity service's form for adding an account; this site never renders one.
+	NewUserURL() string
 
 	// LoginURL is a method rather than a constant so an authorization-code flow could return a very
 	// different URL without anything here changing.

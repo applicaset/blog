@@ -280,3 +280,79 @@ func TestPagesLinkTheStylesheet(t *testing.T) {
 	require.Equal(t, http.StatusOK, stylesheet.Code)
 	assert.Equal(t, "text/css; charset=utf-8", stylesheet.Header().Get("Content-Type"))
 }
+
+func TestAdminOpensOnTheDashboard(t *testing.T) {
+	h := newHarness(t)
+
+	response := h.request(t, http.MethodGet, "/admin", adaToken, nil)
+
+	require.Equal(t, http.StatusFound, response.Code)
+	assert.Equal(t, "/admin/dashboard", response.Header().Get("Location"))
+}
+
+func TestDashboardShowsOnlyTheSectionsTheUserMayOpen(t *testing.T) {
+	h := newHarness(t)
+	h.authz.allow(adaRef, web.ActionPostCreate, "urn:content:post:*")
+
+	response := h.request(t, http.MethodGet, "/admin/dashboard", adaToken, nil)
+
+	require.Equal(t, http.StatusOK, response.Code)
+	body := response.Body.String()
+	assert.Contains(
+		t,
+		body,
+		`<a href="/admin/dashboard" class="tab" aria-current="page">Dashboard</a>`,
+	)
+	assert.Contains(t, body, `<a href="/admin/posts" class="tab">Posts</a>`)
+	assert.NotContains(t, body, `href="/admin/users" class="tab"`)
+	assert.Contains(t, body, "Recent posts")
+}
+
+func TestDashboardIsForbiddenWithoutAnyAdminPermission(t *testing.T) {
+	h := newHarness(t)
+
+	response := h.request(t, http.MethodGet, "/admin/dashboard", graceName, nil)
+
+	assert.Equal(t, http.StatusForbidden, response.Code)
+	assert.NotContains(t, response.Body.String(), `class="tabs"`)
+}
+
+// Asking first must not act: the confirmation page is a GET and deletes nothing.
+func TestDeleteAsksBeforeActing(t *testing.T) {
+	h := newHarness(t)
+	h.authz.allow(adaRef, web.ActionPostDelete, draftRef)
+	h.authz.allow(adaRef, web.ActionUserDelete, graceRef)
+
+	post := h.request(t, http.MethodGet, "/admin/posts/"+draftID+"/delete", adaToken, nil)
+	require.Equal(t, http.StatusOK, post.Code)
+	assert.Contains(t, post.Body.String(), `action="/admin/posts/`+draftID+`/delete"`)
+
+	user := h.request(
+		t,
+		http.MethodGet,
+		"/admin/users/0199bf3c-7a1e-7c2b-9f10-000000000002/delete",
+		adaToken,
+		nil,
+	)
+	require.Equal(t, http.StatusOK, user.Code)
+	assert.Contains(t, user.Body.String(), "grace")
+
+	assert.Empty(t, h.content.deleted)
+	assert.Empty(t, h.auth.deleted)
+}
+
+func TestDeleteConfirmationFollowsTheSameRules(t *testing.T) {
+	h := newHarness(t)
+	h.authz.allow(adaRef, web.ActionUserDelete, adaRef)
+
+	assert.Equal(
+		t,
+		http.StatusForbidden,
+		h.request(t, http.MethodGet, "/admin/posts/"+draftID+"/delete", graceName, nil).Code,
+	)
+	assert.Equal(
+		t,
+		http.StatusBadRequest,
+		h.request(t, http.MethodGet, "/admin/users/"+adaID+"/delete", adaToken, nil).Code,
+	)
+}

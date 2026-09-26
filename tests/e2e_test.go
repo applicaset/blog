@@ -48,7 +48,7 @@ func firstRunToPublishedPost(t *testing.T, h *harness) {
 	require.NoError(t, err)
 	assert.NotContains(t, content, "On Computing", "a draft must not appear on the home page")
 
-	click(t, admin, "Move to published")
+	click(t, admin, "Publish")
 
 	// Now the stranger can read it, without signing in.
 	h.open(t, stranger, "/")

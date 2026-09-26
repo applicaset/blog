@@ -197,6 +197,23 @@ func (s *Server) setPostStatus(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/admin/posts/"+post.ID+"/edit", http.StatusSeeOther)
 }
 
+func (s *Server) confirmDeletePost(w http.ResponseWriter, r *http.Request) {
+	post, ok := s.authorizePost(w, r, ActionPostDelete)
+	if !ok {
+		return
+	}
+
+	data := s.newLayoutData(r, "Delete post")
+	data.Content = confirmContent{
+		Message:   "\"" + post.Title + "\" will be deleted. This cannot be undone.",
+		ActionURL: "/admin/posts/" + post.ID + "/delete",
+		Submit:    "Delete",
+		CancelURL: "/admin/posts/" + post.ID + "/edit",
+	}
+
+	s.render(w, r, http.StatusOK, "confirm.gohtml", data)
+}
+
 func (s *Server) deletePost(w http.ResponseWriter, r *http.Request) {
 	post, ok := s.authorizePost(w, r, ActionPostDelete)
 	if !ok {
@@ -279,6 +296,13 @@ func (s *Server) renderPostFormError(
 	}
 
 	s.render(w, r, http.StatusBadRequest, "admin_post_form.gohtml", data)
+}
+
+// transitionLabels name the button that moves a post into each status.
+var transitionLabels = map[string]string{
+	StatusPublished: "Publish",
+	StatusArchived:  "Archive",
+	StatusDraft:     "Unarchive",
 }
 
 // nextStatuses mirrors the content service's lifecycle. The service enforces the rule; this only

@@ -82,7 +82,7 @@ func (f *fakeAuth) SetupOpen(context.Context) (bool, error) { return f.setupOpen
 func (f *fakeAuth) LoginURL(next string) string             { return "/login?next=" + next }
 func (f *fakeAuth) LogoutURL() string                       { return "/logout" }
 func (f *fakeAuth) PasswordURL() string                     { return "/password" }
-func (f *fakeAuth) RegisterURL() string                     { return "/register" }
+func (f *fakeAuth) NewUserURL() string                      { return "/users/new" }
 
 type grantCall struct {
 	Subject  string

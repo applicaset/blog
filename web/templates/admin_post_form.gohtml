@@ -8,17 +8,15 @@
 
 {{ if .Editing }}
     <section class="flex flex-col gap-4 border-t border-border pt-6">
-        <p class="text-sm">Status: <span class="font-medium">{{ .Post.Status }}</span></p>
+        <p class="flex items-center gap-2 text-sm">Status {{ template "status-badge" .Post.Status }}</p>
         <div class="flex flex-wrap gap-2">
             {{ range .Statuses }}
                 <form method="post" action="/admin/posts/{{ $.Post.ID }}/status">
                     <input type="hidden" name="status" value="{{ . }}">
-                    <button type="submit" class="btn btn-secondary">Move to {{ . }}</button>
+                    <button type="submit" class="btn btn-secondary">{{ transitionLabel . }}</button>
                 </form>
             {{ end }}
-            <form method="post" action="/admin/posts/{{ .Post.ID }}/delete">
-                <button type="submit" class="btn btn-danger">Delete this post</button>
-            </form>
+            <a href="/admin/posts/{{ .Post.ID }}/delete" class="btn btn-danger">Delete</a>
         </div>
     </section>
 {{ end }}

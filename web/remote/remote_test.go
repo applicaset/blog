@@ -143,5 +143,5 @@ func TestLoginURLKeepsTheRedirectOnThisSite(t *testing.T) {
 	assert.Equal(t, "/login", urls.LoginURL("//evil.example/"))
 	assert.Equal(t, "/logout", urls.LogoutURL())
 	assert.Equal(t, "/password", urls.PasswordURL())
-	assert.Equal(t, "/register", urls.RegisterURL())
+	assert.Equal(t, "/users/new", urls.NewUserURL())
 }

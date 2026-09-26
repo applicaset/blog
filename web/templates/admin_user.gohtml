@@ -20,9 +20,9 @@
     <p class="text-sm"><span class="text-muted">Roles:</span> {{ range .HeldRoles }}{{ . }} {{ else }}none{{ end }}</p>
 {{ end }}
 {{ if .CanDelete }}
-    <form method="post" action="/admin/users/{{ .User.ID }}/delete" class="border-t border-border pt-6">
-        <button type="submit" class="btn btn-danger">Delete this account</button>
-    </form>
+    <div class="border-t border-border pt-6">
+        <a href="/admin/users/{{ .User.ID }}/delete" class="btn btn-danger">Delete</a>
+    </div>
 {{ end }}
-<p class="hint"><a href="/admin/users">Back to users</a></p>
+<p><a href="/admin/users" class="back-link">{{ template "mdi-arrow-left.svg" }}Back to users</a></p>
 {{ end }}
