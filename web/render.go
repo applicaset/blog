@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/buildset/buildset/pkg/asset"
+	"github.com/buildset/buildset/pkg/initials"
 )
 
 //go:embed templates/*.gohtml templates/icons/*.svg
@@ -64,6 +65,7 @@ func templateFunctions(basePath string) template.FuncMap {
 	return template.FuncMap{
 		"has":             slices.Contains[[]string, string],
 		"transitionLabel": func(status string) string { return transitionLabels[status] },
+		"initials":        initials.Of,
 		"path":            func(p string) string { return basePath + p },
 	}
 }
