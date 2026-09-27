@@ -3,7 +3,7 @@
     <ul class="divide-y divide-border">
         {{ range .Posts }}
             <li class="flex flex-col gap-1 py-4 sm:flex-row sm:items-baseline sm:justify-between sm:gap-6">
-                <a href="/posts/{{ .ID }}" class="font-medium no-underline hover:underline">{{ .Title }}</a>
+                <a href="{{ path "/posts/" }}{{ .ID }}" class="font-medium no-underline hover:underline">{{ .Title }}</a>
                 {{ with .PublishedAt }}<time class="shrink-0 text-sm text-muted" datetime="{{ .Format "2006-01-02" }}">{{ .Format "2 January 2006" }}</time>{{ end }}
             </li>
         {{ end }}

@@ -1,7 +1,7 @@
 {{ define "content" }}
 <div class="flex flex-wrap items-center justify-between gap-4">
     {{ if not .ShowingEveryone }}<p class="as-hint">These are your own posts.</p>{{ end }}
-    <a href="/admin/posts/new" class="as-button ml-auto">{{ template "mdi-plus.svg" }}New post</a>
+    <a href="{{ path "/admin/posts/new" }}" class="as-button ml-auto">{{ template "mdi-plus.svg" }}New post</a>
 </div>
 {{ if .Posts }}
     <div class="overflow-x-auto">
@@ -10,10 +10,10 @@
             <tbody>
             {{ range .Posts }}
                 <tr>
-                    <td><a href="/posts/{{ .ID }}">{{ .Title }}</a></td>
+                    <td><a href="{{ path "/posts/" }}{{ .ID }}">{{ .Title }}</a></td>
                     <td>{{ template "status-badge" .Status }}</td>
                     <td class="whitespace-nowrap text-muted"><time datetime="{{ .CreatedAt.Format "2006-01-02" }}">{{ .CreatedAt.Format "2 January 2006" }}</time></td>
-                    <td class="text-right"><a href="/admin/posts/{{ .ID }}/edit" class="as-button variant-outlined size-sm">Edit</a></td>
+                    <td class="text-right"><a href="{{ path "/admin/posts/" }}{{ .ID }}/edit" class="as-button variant-outlined size-sm">Edit</a></td>
                 </tr>
             {{ end }}
             </tbody>

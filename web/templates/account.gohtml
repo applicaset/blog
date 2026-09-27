@@ -1,5 +1,5 @@
 {{ define "content" }}
-<form method="post" action="/account" class="flex max-w-sm flex-col gap-5">
+<form method="post" action="{{ path "/account" }}" class="flex max-w-sm flex-col gap-5">
     <label class="as-field">Username <input class="as-input" name="username" value="{{ .User.Username }}" required autocomplete="username"></label>
     <label class="as-field">Display name <input class="as-input" name="name" value="{{ .User.Name }}" autocomplete="name"></label>
     <div><button type="submit" class="as-button">Save</button></div>

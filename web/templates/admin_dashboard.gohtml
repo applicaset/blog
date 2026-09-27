@@ -15,15 +15,15 @@
     <section class="flex flex-col gap-3">
         <div class="flex items-baseline justify-between gap-4">
             <h2>Recent posts</h2>
-            <a href="/admin/posts" class="text-sm">All posts</a>
+            <a href="{{ path "/admin/posts" }}" class="text-sm">All posts</a>
         </div>
         {{ if .RecentPosts }}
             <ul class="divide-y divide-border border-y border-border">
                 {{ range .RecentPosts }}
                     <li class="flex items-center gap-3 py-3">
-                        <a href="/posts/{{ .ID }}" class="min-w-0 flex-1 truncate">{{ .Title }}</a>
+                        <a href="{{ path "/posts/" }}{{ .ID }}" class="min-w-0 flex-1 truncate">{{ .Title }}</a>
                         {{ template "status-badge" .Status }}
-                        <a href="/admin/posts/{{ .ID }}/edit" class="as-button variant-outlined size-sm">Edit</a>
+                        <a href="{{ path "/admin/posts/" }}{{ .ID }}/edit" class="as-button variant-outlined size-sm">Edit</a>
                     </li>
                 {{ end }}
             </ul>

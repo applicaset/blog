@@ -37,6 +37,13 @@ type harness struct {
 func newHarness(t *testing.T) *harness {
 	t.Helper()
 
+	return newHarnessAt(t, "")
+}
+
+// newHarnessAt serves the site as a gateway would when it mounts the site at basePath.
+func newHarnessAt(t *testing.T, basePath string) *harness {
+	t.Helper()
+
 	ada := &web.User{Ref: adaRef, ID: adaID, Username: "ada", Name: "Ada"}
 	grace := &web.User{
 		Ref:      graceRef,
@@ -65,7 +72,7 @@ func newHarness(t *testing.T) *harness {
 
 	server, err := web.New(
 		web.Dependencies{Auth: auth, Authz: authz, Content: content},
-		web.Config{SessionCookieName: sessionCookieName, SiteTitle: "Blog"},
+		web.Config{SessionCookieName: sessionCookieName, SiteTitle: "Blog", BasePath: basePath},
 		slog.New(slog.DiscardHandler),
 	)
 	require.NoError(t, err)
@@ -111,6 +118,24 @@ func TestAnonymousVisitorIsSentToSignIn(t *testing.T) {
 
 	require.Equal(t, http.StatusSeeOther, response.Code)
 	assert.Equal(t, "/login?next=/admin/posts/new", response.Header().Get("Location"))
+}
+
+// The gateway strips the prefix before the request arrives, so only the links written back carry it.
+func TestLinksAndRedirectsCarryTheBasePath(t *testing.T) {
+	h := newHarnessAt(t, "/blog")
+
+	response := h.request(t, http.MethodGet, "/admin/posts/new", "", nil)
+	require.Equal(t, http.StatusSeeOther, response.Code)
+	assert.Equal(t, "/login?next=/blog/admin/posts/new", response.Header().Get("Location"))
+
+	response = h.request(t, http.MethodGet, "/admin", adaToken, nil)
+	require.Equal(t, http.StatusFound, response.Code)
+	assert.Equal(t, "/blog/admin/dashboard", response.Header().Get("Location"))
+
+	page := h.request(t, http.MethodGet, "/", "", nil).Body.String()
+	assert.Contains(t, page, `href="/blog/"`)
+	assert.Contains(t, page, `href="/blog/static/style.min.css?v=`)
+	assert.NotContains(t, page, `href="/static/`)
 }
 
 // A draft must not be distinguishable from a post that was never written, so the answer is 404 and

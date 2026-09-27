@@ -77,7 +77,7 @@ func (s *Server) requireUser(w http.ResponseWriter, r *http.Request) (*User, boo
 		return nil, false
 	}
 
-	http.Redirect(w, r, s.deps.Auth.LoginURL(r.URL.RequestURI()), http.StatusSeeOther)
+	http.Redirect(w, r, s.deps.Auth.LoginURL(s.currentURL(r)), http.StatusSeeOther)
 
 	return nil, false
 }

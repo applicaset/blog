@@ -21,7 +21,10 @@ func (s *Server) accountForm(w http.ResponseWriter, r *http.Request) {
 		data.Notice = "Your account has been updated."
 	}
 
-	data.Content = accountContent{User: *user, PasswordURL: s.deps.Auth.PasswordURL()}
+	data.Content = accountContent{
+		User:        *user,
+		PasswordURL: s.deps.Auth.PasswordURL(s.currentURL(r)),
+	}
 
 	s.render(w, r, http.StatusOK, "account.gohtml", data)
 }
@@ -60,7 +63,7 @@ func (s *Server) accountSubmit(w http.ResponseWriter, r *http.Request) {
 		data.ErrorMessage = err.Error()
 		data.Content = accountContent{
 			User:        User{Ref: user.Ref, Username: username, Name: name},
-			PasswordURL: s.deps.Auth.PasswordURL(),
+			PasswordURL: s.deps.Auth.PasswordURL(s.path("/account")),
 		}
 
 		s.render(w, r, status, "account.gohtml", data)
@@ -68,5 +71,5 @@ func (s *Server) accountSubmit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, "/account?saved", http.StatusSeeOther)
+	http.Redirect(w, r, s.path("/account?saved"), http.StatusSeeOther)
 }

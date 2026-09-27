@@ -23,6 +23,9 @@ type Config struct {
 	SessionCookieName string
 	SecureCookies     bool
 	SiteTitle         string
+	// BasePath is where a gateway mounts this site, such as "/blog", or empty for the root. The
+	// gateway strips it before the request arrives, so only the links this site writes carry it.
+	BasePath string
 }
 
 // Dependencies are the other services this site composes, each behind an interface it declares.
@@ -52,7 +55,7 @@ func New(deps Dependencies, config Config, logger *slog.Logger) (*Server, error)
 		config.SiteTitle = "Blog"
 	}
 
-	templates, err := parseTemplates()
+	templates, err := parseTemplates(config.BasePath)
 	if err != nil {
 		return nil, err
 	}
@@ -98,6 +101,16 @@ func (s *Server) pages() http.Handler {
 	mux.HandleFunc("/", s.notFound)
 
 	return mux
+}
+
+// path is a link to p on this site, wherever the gateway mounted it.
+func (s *Server) path(p string) string {
+	return s.config.BasePath + p
+}
+
+// currentURL is the page being served as the browser sees it, for a link that must return here.
+func (s *Server) currentURL(r *http.Request) string {
+	return s.path(r.URL.RequestURI())
 }
 
 // parseForm bounds the request body before reading it.

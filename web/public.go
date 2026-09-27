@@ -26,7 +26,7 @@ func (s *Server) index(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if open {
-		http.Redirect(w, r, "/setup", http.StatusSeeOther)
+		http.Redirect(w, r, s.deps.Auth.SetupURL(s.path("/")), http.StatusSeeOther)
 
 		return
 	}

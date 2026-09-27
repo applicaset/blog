@@ -60,17 +60,20 @@ type layoutData struct {
 }
 
 // templateFunctions are the few helpers the pages need that html/template does not provide.
-var templateFunctions = template.FuncMap{
-	"has":             slices.Contains[[]string, string],
-	"transitionLabel": func(status string) string { return transitionLabels[status] },
+func templateFunctions(basePath string) template.FuncMap {
+	return template.FuncMap{
+		"has":             slices.Contains[[]string, string],
+		"transitionLabel": func(status string) string { return transitionLabels[status] },
+		"path":            func(p string) string { return basePath + p },
+	}
 }
 
-func parseTemplates() (map[string]*template.Template, error) {
+func parseTemplates(basePath string) (map[string]*template.Template, error) {
 	pages := make(map[string]*template.Template, len(pageNames))
 
 	for _, name := range pageNames {
 		page, err := template.New(name).
-			Funcs(templateFunctions).
+			Funcs(templateFunctions(basePath)).
 			ParseFS(templateFiles, "templates/layout.gohtml", "templates/icons/*.svg", "templates/"+name)
 		if err != nil {
 			return nil, fmt.Errorf("parse template %s: %w", name, err)
@@ -89,11 +92,11 @@ func (s *Server) newLayoutData(r *http.Request, title string) layoutData {
 	data := layoutData{
 		SiteTitle:     s.config.SiteTitle,
 		Title:         title,
-		StylesheetURL: stylesheet.URL,
+		StylesheetURL: s.path(stylesheet.URL),
 		CurrentUser:   user,
-		LoginURL:      s.deps.Auth.LoginURL(r.URL.RequestURI()),
-		LogoutURL:     s.deps.Auth.LogoutURL(),
-		PasswordURL:   s.deps.Auth.PasswordURL(),
+		LoginURL:      s.deps.Auth.LoginURL(s.currentURL(r)),
+		LogoutURL:     s.deps.Auth.LogoutURL(s.path("/")),
+		PasswordURL:   s.deps.Auth.PasswordURL(s.currentURL(r)),
 	}
 
 	if user != nil {

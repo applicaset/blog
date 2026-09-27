@@ -13,7 +13,9 @@ const (
 )
 
 type adminTab struct {
-	Label  string
+	Label string
+	// Path is the section's route here, and URL the link to it as the browser sees it.
+	Path   string
 	URL    string
 	Active bool
 }
@@ -31,7 +33,7 @@ type dashboardContent struct {
 }
 
 func (s *Server) adminIndex(w http.ResponseWriter, r *http.Request) {
-	http.Redirect(w, r, dashboardPath, http.StatusFound)
+	http.Redirect(w, r, s.path(dashboardPath), http.StatusFound)
 }
 
 // adminDashboard is reachable by anyone who can do something on one of the other admin pages, so
@@ -141,18 +143,20 @@ func (s *Server) adminTabs(r *http.Request, user *User, canManagePosts bool) []a
 		return nil
 	}
 
-	tabs := []adminTab{{Label: "Dashboard", URL: dashboardPath}}
+	tabs := []adminTab{{Label: "Dashboard", Path: dashboardPath}}
 
 	if canManagePosts {
-		tabs = append(tabs, adminTab{Label: "Posts", URL: "/admin/posts"})
+		tabs = append(tabs, adminTab{Label: "Posts", Path: "/admin/posts"})
 	}
 
 	if canManageUsers {
-		tabs = append(tabs, adminTab{Label: "Users", URL: "/admin/users"})
+		tabs = append(tabs, adminTab{Label: "Users", Path: "/admin/users"})
 	}
 
 	for i := range tabs {
-		tabs[i].Active = r.URL.Path == tabs[i].URL || strings.HasPrefix(r.URL.Path, tabs[i].URL+"/")
+		tabs[i].URL = s.path(tabs[i].Path)
+		tabs[i].Active = r.URL.Path == tabs[i].Path ||
+			strings.HasPrefix(r.URL.Path, tabs[i].Path+"/")
 	}
 
 	return tabs

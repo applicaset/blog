@@ -34,6 +34,7 @@ type Config struct {
 	SessionCookieName string
 	SecureCookies     bool
 	SiteTitle         string
+	BasePath          string
 	Database          DatabaseConfig
 	Auth              AuthConfig
 }
@@ -52,6 +53,11 @@ func LoadConfig(ctx context.Context) (*Config, error) {
 
 	cookie := config.LoadCookie()
 
+	basePath, err := config.LoadBasePath()
+	if err != nil {
+		return nil, err
+	}
+
 	cfg := &Config{
 		Server:            config.LoadServer(),
 		LogLevel:          log.Level,
@@ -59,6 +65,7 @@ func LoadConfig(ctx context.Context) (*Config, error) {
 		SessionCookieName: cookie.Name,
 		SecureCookies:     cookie.Secure,
 		SiteTitle:         env.GetString("SITE_TITLE", "Blog"),
+		BasePath:          basePath,
 		Database:          storage.Load(),
 		Auth:              LoadAuthConfig(),
 	}
@@ -75,7 +82,7 @@ func LoadAuthConfig() AuthConfig {
 	return AuthConfig{
 		BcryptCost:       env.GetInt("AUTH_BCRYPT_COST", 12),
 		SessionTTL:       env.GetDuration("AUTH_SESSION_TTL", 14*24*time.Hour),
-		RegistrationOpen: env.GetBool("AUTH_REGISTRATION_OPEN", false),
+		RegistrationOpen: env.GetBool("AUTH_REGISTRATION_OPEN", true),
 	}
 }
 

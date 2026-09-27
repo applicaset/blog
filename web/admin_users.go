@@ -51,7 +51,7 @@ func (s *Server) adminUsers(w http.ResponseWriter, r *http.Request) {
 	data.Content = adminUsersContent{
 		Users:      users,
 		CanCreate:  canCreate,
-		NewUserURL: s.deps.Auth.NewUserURL(),
+		NewUserURL: s.deps.Auth.NewUserURL(s.path("/admin/users")),
 	}
 
 	s.render(w, r, http.StatusOK, "admin_users.gohtml", data)
@@ -151,7 +151,7 @@ func (s *Server) setUserRoles(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	http.Redirect(w, r, "/admin/users/"+subject.ID+"?saved", http.StatusSeeOther)
+	http.Redirect(w, r, s.path("/admin/users/"+subject.ID+"?saved"), http.StatusSeeOther)
 }
 
 // authorizeUser loads the user named in the path and checks one permission over them.
@@ -243,9 +243,9 @@ func (s *Server) confirmDeleteUser(w http.ResponseWriter, r *http.Request) {
 	data := s.newLayoutData(r, "Delete account")
 	data.Content = confirmContent{
 		Message:   "The account " + subject.Username + " will be deleted. This cannot be undone.",
-		ActionURL: "/admin/users/" + subject.ID + "/delete",
+		ActionURL: s.path("/admin/users/" + subject.ID + "/delete"),
 		Submit:    "Delete",
-		CancelURL: "/admin/users/" + subject.ID,
+		CancelURL: s.path("/admin/users/" + subject.ID),
 	}
 
 	s.render(w, r, http.StatusOK, "confirm.gohtml", data)
@@ -278,5 +278,5 @@ func (s *Server) deleteUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, "/admin/users?deleted", http.StatusSeeOther)
+	http.Redirect(w, r, s.path("/admin/users?deleted"), http.StatusSeeOther)
 }

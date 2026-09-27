@@ -74,10 +74,11 @@ func (a *Auth) SetupOpen(ctx context.Context) (bool, error) {
 	return open, translate(err)
 }
 
-func (a *Auth) LoginURL(next string) string { return a.urls.LoginURL(next) }
-func (a *Auth) LogoutURL() string           { return a.urls.LogoutURL() }
-func (a *Auth) PasswordURL() string         { return a.urls.PasswordURL() }
-func (a *Auth) NewUserURL() string          { return a.urls.NewUserURL() }
+func (a *Auth) LoginURL(next string) string    { return a.urls.LoginURL(next) }
+func (a *Auth) LogoutURL(next string) string   { return a.urls.LogoutURL(next) }
+func (a *Auth) PasswordURL(next string) string { return a.urls.PasswordURL(next) }
+func (a *Auth) NewUserURL(next string) string  { return a.urls.NewUserURL(next) }
+func (a *Auth) SetupURL(next string) string    { return a.urls.SetupURL(next) }
 
 func toWebUser(user authapi.User) *web.User {
 	return &web.User{

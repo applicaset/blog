@@ -112,7 +112,7 @@ func (s *Server) createPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, "/admin/posts/"+post.ID+"/edit", http.StatusSeeOther)
+	http.Redirect(w, r, s.path("/admin/posts/"+post.ID+"/edit"), http.StatusSeeOther)
 }
 
 func (s *Server) editPostForm(w http.ResponseWriter, r *http.Request) {
@@ -157,7 +157,7 @@ func (s *Server) updatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, "/admin/posts/"+post.ID+"/edit?saved", http.StatusSeeOther)
+	http.Redirect(w, r, s.path("/admin/posts/"+post.ID+"/edit?saved"), http.StatusSeeOther)
 }
 
 func (s *Server) setPostStatus(w http.ResponseWriter, r *http.Request) {
@@ -194,7 +194,7 @@ func (s *Server) setPostStatus(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, "/admin/posts/"+post.ID+"/edit", http.StatusSeeOther)
+	http.Redirect(w, r, s.path("/admin/posts/"+post.ID+"/edit"), http.StatusSeeOther)
 }
 
 func (s *Server) confirmDeletePost(w http.ResponseWriter, r *http.Request) {
@@ -206,9 +206,9 @@ func (s *Server) confirmDeletePost(w http.ResponseWriter, r *http.Request) {
 	data := s.newLayoutData(r, "Delete post")
 	data.Content = confirmContent{
 		Message:   "\"" + post.Title + "\" will be deleted. This cannot be undone.",
-		ActionURL: "/admin/posts/" + post.ID + "/delete",
+		ActionURL: s.path("/admin/posts/" + post.ID + "/delete"),
 		Submit:    "Delete",
-		CancelURL: "/admin/posts/" + post.ID + "/edit",
+		CancelURL: s.path("/admin/posts/" + post.ID + "/edit"),
 	}
 
 	s.render(w, r, http.StatusOK, "confirm.gohtml", data)
@@ -235,7 +235,7 @@ func (s *Server) deletePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, "/admin/posts", http.StatusSeeOther)
+	http.Redirect(w, r, s.path("/admin/posts"), http.StatusSeeOther)
 }
 
 // A post that does not exist and one the visitor may not touch answer the same way.

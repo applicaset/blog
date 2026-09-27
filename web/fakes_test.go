@@ -80,9 +80,10 @@ func (f *fakeAuth) DeleteUser(_ context.Context, userRef string) error {
 
 func (f *fakeAuth) SetupOpen(context.Context) (bool, error) { return f.setupOpen, nil }
 func (f *fakeAuth) LoginURL(next string) string             { return "/login?next=" + next }
-func (f *fakeAuth) LogoutURL() string                       { return "/logout" }
-func (f *fakeAuth) PasswordURL() string                     { return "/password" }
-func (f *fakeAuth) NewUserURL() string                      { return "/users/new" }
+func (f *fakeAuth) LogoutURL(string) string                 { return "/logout" }
+func (f *fakeAuth) PasswordURL(string) string               { return "/password" }
+func (f *fakeAuth) NewUserURL(string) string                { return "/users/new" }
+func (f *fakeAuth) SetupURL(string) string                  { return "/setup" }
 
 type grantCall struct {
 	Subject  string

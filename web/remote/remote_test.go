@@ -141,7 +141,8 @@ func TestLoginURLKeepsTheRedirectOnThisSite(t *testing.T) {
 	// Anything that could leave the origin collapses to the home page, so no next is carried.
 	assert.Equal(t, "/login", urls.LoginURL("https://evil.example/"))
 	assert.Equal(t, "/login", urls.LoginURL("//evil.example/"))
-	assert.Equal(t, "/logout", urls.LogoutURL())
-	assert.Equal(t, "/password", urls.PasswordURL())
-	assert.Equal(t, "/users/new", urls.NewUserURL())
+	assert.Equal(t, "/logout?next=%2Fblog%2F", urls.LogoutURL("/blog/"))
+	assert.Equal(t, "/password", urls.PasswordURL("/"))
+	assert.Equal(t, "/users/new?next=%2Fadmin%2Fusers", urls.NewUserURL("/admin/users"))
+	assert.Equal(t, "/setup?next=%2Fblog%2F", urls.SetupURL("/blog/"))
 }

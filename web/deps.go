@@ -61,14 +61,17 @@ type Auth interface {
 	DeleteUser(ctx context.Context, userRef string) error
 	SetupOpen(ctx context.Context) (bool, error)
 
-	// NewUserURL is the identity service's form for adding an account; this site never renders one.
-	NewUserURL() string
+	// The identity service's pages. Each takes the page to send the visitor back to, because
+	// another site may share them and "/" need not be this one.
 
+	// NewUserURL is the form for adding an account; this site never renders one.
+	NewUserURL(next string) string
+	SetupURL(next string) string
 	// LoginURL is a method rather than a constant so an authorization-code flow could return a very
 	// different URL without anything here changing.
 	LoginURL(next string) string
-	LogoutURL() string
-	PasswordURL() string
+	LogoutURL(next string) string
+	PasswordURL(next string) string
 }
 
 type Authz interface {

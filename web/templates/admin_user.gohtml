@@ -6,7 +6,7 @@
 {{ if .IsSelf }}<p class="as-alert variant-info">This is your own account.</p>{{ end }}
 
 {{ if .CanAssign }}
-    <form method="post" action="/admin/users/{{ .User.ID }}/roles" class="flex flex-col gap-4">
+    <form method="post" action="{{ path "/admin/users/" }}{{ .User.ID }}/roles" class="flex flex-col gap-4">
         <fieldset class="flex flex-col gap-3">
             <legend class="mb-3 text-sm font-medium">Roles</legend>
             {{ $held := .HeldRoles }}
@@ -21,8 +21,8 @@
 {{ end }}
 {{ if .CanDelete }}
     <div class="border-t border-border pt-6">
-        <a href="/admin/users/{{ .User.ID }}/delete" class="as-button is-danger">Delete</a>
+        <a href="{{ path "/admin/users/" }}{{ .User.ID }}/delete" class="as-button is-danger">Delete</a>
     </div>
 {{ end }}
-<p><a href="/admin/users" class="as-back-link">{{ template "mdi-arrow-left.svg" }}Back to users</a></p>
+<p><a href="{{ path "/admin/users" }}" class="as-back-link">{{ template "mdi-arrow-left.svg" }}Back to users</a></p>
 {{ end }}

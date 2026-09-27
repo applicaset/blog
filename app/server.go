@@ -40,6 +40,7 @@ func Routes(cfg *Config, svc *services, logger *slog.Logger) (http.Handler, erro
 		SessionCookieName: cfg.SessionCookieName,
 		SecureCookies:     cfg.SecureCookies,
 		SiteTitle:         cfg.SiteTitle,
+		BasePath:          cfg.BasePath,
 	}, logger)
 	if err != nil {
 		return nil, fmt.Errorf("build web server: %w", err)

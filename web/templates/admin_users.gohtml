@@ -8,7 +8,7 @@
             <tr>
                 <td>{{ .Username }}</td>
                 <td class="text-muted">{{ .Name }}</td>
-                <td class="text-right"><a href="/admin/users/{{ .ID }}" class="as-button variant-outlined size-sm">Roles</a></td>
+                <td class="text-right"><a href="{{ path "/admin/users/" }}{{ .ID }}" class="as-button variant-outlined size-sm">Roles</a></td>
             </tr>
         {{ end }}
         </tbody>

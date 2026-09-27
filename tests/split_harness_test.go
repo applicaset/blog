@@ -31,6 +31,9 @@ var identityPaths = []string{"/setup", "/login", "/logout", "/register", "/users
 
 const identityPrefix = "/auth/"
 
+// blogPath is where the gateway mounts the blog, as the Caddyfile does.
+const blogPath = "/blog"
+
 // newSplitHarness boots the four services behind a proxy carrying the gateway's routing, so the
 // browser sees one origin as it does in compose. They share one SQLite file, which is not how they
 // are deployed, but what a split breaks is the boundary between the processes.
@@ -53,26 +56,29 @@ func newSplitHarness(t *testing.T) *harness {
 	gateway := httptest.NewServer(newGateway(t, authURL, webURL))
 	t.Cleanup(gateway.Close)
 
-	return &harness{url: gateway.URL, browser: browser}
+	return &harness{url: gateway.URL, site: blogPath, browser: browser}
 }
 
-// newGateway is the Caddyfile in twenty lines: the identity paths to one service, everything else
-// to the site.
+// newGateway is the Caddyfile in thirty lines: the identity paths to one service, the blog under
+// its prefix with the prefix stripped, and the root redirected to the blog.
 func newGateway(t *testing.T, authURL, webURL string) http.Handler {
 	t.Helper()
 
 	identity := newProxy(t, authURL)
-	site := newProxy(t, webURL)
+	site := http.StripPrefix(blogPath, newProxy(t, webURL))
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if slices.Contains(identityPaths, r.URL.Path) ||
-			strings.HasPrefix(r.URL.Path, identityPrefix) {
+		switch {
+		case slices.Contains(identityPaths, r.URL.Path) ||
+			strings.HasPrefix(r.URL.Path, identityPrefix):
 			identity.ServeHTTP(w, r)
-
-			return
+		case r.URL.Path == "/" || r.URL.Path == blogPath:
+			http.Redirect(w, r, blogPath+"/", http.StatusFound)
+		case strings.HasPrefix(r.URL.Path, blogPath+"/"):
+			site.ServeHTTP(w, r)
+		default:
+			http.NotFound(w, r)
 		}
-
-		site.ServeHTTP(w, r)
 	})
 }
 
@@ -163,6 +169,7 @@ func startWeb(t *testing.T, logger *slog.Logger, authURL, authzURL, contentURL s
 		Port: "8080", ShutdownTimeout: time.Second,
 		Cookie:      config.Cookie{Name: config.SessionCookieName, Secure: false},
 		SiteTitle:   "Test Blog",
+		BasePath:    blogPath,
 		AuthURL:     authURL,
 		AuthzURL:    authzURL,
 		ContentURL:  contentURL,

@@ -20,7 +20,10 @@ import (
 )
 
 type harness struct {
-	url     string
+	url string
+	// site is where the blog is mounted: the root for the single binary, a prefix behind the
+	// gateway.
+	site    string
 	browser playwright.Browser
 }
 
@@ -157,6 +160,13 @@ func (h *harness) open(t *testing.T, page playwright.Page, path string) playwrig
 	require.NoError(t, err)
 
 	return response
+}
+
+// openSite opens a page of the blog itself, wherever it is mounted.
+func (h *harness) openSite(t *testing.T, page playwright.Page, path string) playwright.Response {
+	t.Helper()
+
+	return h.open(t, page, h.site+path)
 }
 
 func fill(t *testing.T, page playwright.Page, label, value string) {

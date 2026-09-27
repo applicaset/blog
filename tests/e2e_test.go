@@ -20,7 +20,7 @@ func firstRunToPublishedPost(t *testing.T, h *harness) {
 	admin := h.newPage(t)
 
 	// An instance with no accounts sends its first visitor to set itself up.
-	h.open(t, admin, "/")
+	h.openSite(t, admin, "/")
 	require.Contains(t, admin.URL(), "/setup")
 
 	fill(t, admin, "Username", "ada")
@@ -34,14 +34,14 @@ func firstRunToPublishedPost(t *testing.T, h *harness) {
 		admin.GetByRole("link", playwright.PageGetByRoleOptions{Name: "Admin"}).WaitFor(),
 	)
 
-	h.open(t, admin, "/admin/posts/new")
+	h.openSite(t, admin, "/admin/posts/new")
 	fill(t, admin, "Title", "On Computing")
 	fill(t, admin, "Body", "First paragraph.\n\nSecond paragraph.")
 	click(t, admin, "Create draft")
 
 	// A draft is not visible to anyone else, and looks like nothing at all.
 	stranger := h.newPage(t)
-	response := h.open(t, stranger, "/")
+	response := h.openSite(t, stranger, "/")
 	require.Equal(t, 200, response.Status())
 
 	content, err := stranger.Content()
@@ -51,7 +51,7 @@ func firstRunToPublishedPost(t *testing.T, h *harness) {
 	click(t, admin, "Publish")
 
 	// Now the stranger can read it, without signing in.
-	h.open(t, stranger, "/")
+	h.openSite(t, stranger, "/")
 	require.NoError(
 		t,
 		stranger.GetByRole("link", playwright.PageGetByRoleOptions{Name: "On Computing"}).Click(),
@@ -86,11 +86,11 @@ func signedInReaderHasNoAdministration(t *testing.T, h *harness) {
 	fill(t, reader, "Password", "another good secret")
 	click(t, reader, "Create account")
 
-	response := h.open(t, reader, "/admin")
+	response := h.openSite(t, reader, "/admin")
 	assert.Equal(t, 403, response.Status(), "a signed-in reader has no administration")
 
 	// The public site still works for them.
-	response = h.open(t, reader, "/")
+	response = h.openSite(t, reader, "/")
 	assert.Equal(t, 200, response.Status())
 
 	count, err := reader.GetByRole("link", playwright.PageGetByRoleOptions{Name: "Admin"}).Count()

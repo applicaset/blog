@@ -31,6 +31,7 @@ type Config struct {
 	Cookie config.Cookie
 
 	SiteTitle string
+	BasePath  string
 
 	AuthURL     string
 	AuthzURL    string
@@ -47,6 +48,11 @@ func LoadConfig(ctx context.Context) (*Config, error) {
 		return nil, err
 	}
 
+	basePath, err := config.LoadBasePath()
+	if err != nil {
+		return nil, err
+	}
+
 	urls := map[string]*string{}
 
 	cfg := &Config{
@@ -54,6 +60,7 @@ func LoadConfig(ctx context.Context) (*Config, error) {
 		Log:         log,
 		Cookie:      config.LoadCookie(),
 		SiteTitle:   env.GetString("SITE_TITLE", "Blog"),
+		BasePath:    basePath,
 		HTTPTimeout: env.GetDuration("HTTP_TIMEOUT", 5*time.Second),
 		URLs:        loadURLs(),
 	}
@@ -83,6 +90,7 @@ func loadURLs() remote.URLs {
 	defaults := remote.DefaultURLs()
 
 	return remote.URLs{
+		Setup:    env.GetString("AUTH_SETUP_PATH", defaults.Setup),
 		Login:    env.GetString("AUTH_LOGIN_PATH", defaults.Login),
 		Logout:   env.GetString("AUTH_LOGOUT_PATH", defaults.Logout),
 		Password: env.GetString("AUTH_PASSWORD_PATH", defaults.Password),
@@ -136,6 +144,7 @@ func New(cfg *Config, logger *slog.Logger) (*Site, error) {
 		SessionCookieName: cfg.Cookie.Name,
 		SecureCookies:     cfg.Cookie.Secure,
 		SiteTitle:         cfg.SiteTitle,
+		BasePath:          cfg.BasePath,
 	}, logger)
 	if err != nil {
 		return nil, fmt.Errorf("build web server: %w", err)
