@@ -1,7 +1,7 @@
-// Package webapp is the composition root of the site running on its own. It has no database and
+// Package app is the composition root of the site running on its own. It has no database and
 // asks other services for everything through web/remote, so it links no service code, no password
 // hashing and no SQL driver.
-package webapp
+package app
 
 import (
 	"context"
@@ -13,12 +13,12 @@ import (
 
 	authclient "github.com/buildset/buildset/auth/client"
 	authzclient "github.com/buildset/buildset/authz/client"
-	contentclient "github.com/buildset/buildset/content/client"
+	contentclient "github.com/buildset/buildset/blog/content/client"
+	"github.com/buildset/buildset/blog/web"
+	"github.com/buildset/buildset/blog/web/remote"
 	"github.com/buildset/buildset/pkg/config"
 	"github.com/buildset/buildset/pkg/httpx"
 	"github.com/buildset/buildset/pkg/serve"
-	"github.com/buildset/buildset/web"
-	"github.com/buildset/buildset/web/remote"
 	"github.com/nasermirzaei89/env"
 )
 

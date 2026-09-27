@@ -1,6 +1,6 @@
-// Package contentapp is the composition root of the content service running on its own. It is a
+// Package app is the composition root of the content service running on its own. It is a
 // package rather than a main so a test can build the routes without a listener.
-package contentapp
+package app
 
 import (
 	"context"
@@ -9,10 +9,10 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/buildset/buildset/content"
-	"github.com/buildset/buildset/content/httpapi"
-	contentpostgres "github.com/buildset/buildset/content/postgres"
-	contentsqlite "github.com/buildset/buildset/content/sqlite"
+	"github.com/buildset/buildset/blog/content"
+	"github.com/buildset/buildset/blog/content/httpapi"
+	contentpostgres "github.com/buildset/buildset/blog/content/postgres"
+	contentsqlite "github.com/buildset/buildset/blog/content/sqlite"
 	"github.com/buildset/buildset/pkg/config"
 	"github.com/buildset/buildset/pkg/serve"
 	"github.com/buildset/buildset/pkg/storage"

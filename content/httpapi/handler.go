@@ -8,7 +8,7 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/buildset/buildset/content"
+	"github.com/buildset/buildset/blog/content"
 	"github.com/buildset/buildset/pkg/api/contentapi"
 	"github.com/buildset/buildset/pkg/httpx"
 )

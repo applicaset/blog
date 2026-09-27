@@ -6,7 +6,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/buildset/buildset/web"
+	"github.com/buildset/buildset/blog/web"
 )
 
 // The fakes below stand in for the other services. They are hand written because a generated mock

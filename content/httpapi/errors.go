@@ -3,7 +3,7 @@ package httpapi
 import (
 	"errors"
 
-	"github.com/buildset/buildset/content"
+	"github.com/buildset/buildset/blog/content"
 	"github.com/buildset/buildset/pkg/httpx"
 )
 

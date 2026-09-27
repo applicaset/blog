@@ -4,9 +4,9 @@ import (
 	"database/sql"
 	"testing"
 
-	"github.com/buildset/buildset/content"
-	"github.com/buildset/buildset/content/repotest"
-	"github.com/buildset/buildset/content/sqlite"
+	"github.com/buildset/buildset/blog/content"
+	"github.com/buildset/buildset/blog/content/repotest"
+	"github.com/buildset/buildset/blog/content/sqlite"
 	"github.com/stretchr/testify/require"
 	_ "modernc.org/sqlite"
 )

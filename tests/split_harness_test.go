@@ -14,14 +14,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/buildset/buildset/app/authapp"
-	"github.com/buildset/buildset/app/authzapp"
-	"github.com/buildset/buildset/app/contentapp"
-	"github.com/buildset/buildset/app/webapp"
+	authapp "github.com/buildset/buildset/auth/app"
+	authzapp "github.com/buildset/buildset/authz/app"
+	contentapp "github.com/buildset/buildset/blog/content/app"
+	webapp "github.com/buildset/buildset/blog/web/app"
+	"github.com/buildset/buildset/blog/web/remote"
 	"github.com/buildset/buildset/pkg/config"
 	"github.com/buildset/buildset/pkg/serve"
 	"github.com/buildset/buildset/pkg/storage"
-	"github.com/buildset/buildset/web/remote"
 	"github.com/stretchr/testify/require"
 )
 

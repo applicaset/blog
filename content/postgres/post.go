@@ -7,7 +7,7 @@ import (
 	"fmt"
 
 	"github.com/Masterminds/squirrel"
-	"github.com/buildset/buildset/content"
+	"github.com/buildset/buildset/blog/content"
 )
 
 const tablePosts = "posts"

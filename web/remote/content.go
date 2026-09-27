@@ -4,10 +4,10 @@ import (
 	"context"
 	"html/template"
 
-	contentclient "github.com/buildset/buildset/content/client"
-	"github.com/buildset/buildset/content/render"
+	contentclient "github.com/buildset/buildset/blog/content/client"
+	"github.com/buildset/buildset/blog/content/render"
+	"github.com/buildset/buildset/blog/web"
 	"github.com/buildset/buildset/pkg/api/contentapi"
-	"github.com/buildset/buildset/web"
 )
 
 // Content satisfies web.Content by calling the content service.

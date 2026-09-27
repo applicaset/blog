@@ -4,8 +4,8 @@ import (
 	"context"
 
 	authclient "github.com/buildset/buildset/auth/client"
+	"github.com/buildset/buildset/blog/web"
 	"github.com/buildset/buildset/pkg/api/authapi"
-	"github.com/buildset/buildset/web"
 )
 
 // Auth satisfies web.Auth by calling the identity service.

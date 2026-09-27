@@ -7,9 +7,9 @@ import (
 	"time"
 
 	authclient "github.com/buildset/buildset/auth/client"
+	"github.com/buildset/buildset/blog/web"
+	"github.com/buildset/buildset/blog/web/remote"
 	"github.com/buildset/buildset/pkg/httpx"
-	"github.com/buildset/buildset/web"
-	"github.com/buildset/buildset/web/remote"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

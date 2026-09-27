@@ -6,8 +6,8 @@ package remote
 import (
 	"errors"
 
+	"github.com/buildset/buildset/blog/web"
 	"github.com/buildset/buildset/pkg/httpx"
-	"github.com/buildset/buildset/web"
 )
 
 // translate turns a domain failure into the sentinel the site matches on and leaves everything

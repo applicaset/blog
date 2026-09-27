@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/buildset/buildset/app"
+	"github.com/buildset/buildset/blog/app"
 	"github.com/nasermirzaei89/env"
 	"github.com/playwright-community/playwright-go"
 	"github.com/stretchr/testify/require"

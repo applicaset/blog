@@ -7,7 +7,7 @@ import (
 	"net/http"
 
 	authui "github.com/buildset/buildset/auth/ui"
-	"github.com/buildset/buildset/web"
+	"github.com/buildset/buildset/blog/web"
 )
 
 // Routes mounts every service handler. Health probes and middleware are not here: pkg/serve owns

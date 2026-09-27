@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/buildset/buildset/app/webapp"
+	webapp "github.com/buildset/buildset/blog/web/app"
 	"github.com/buildset/buildset/pkg/serve"
 )
 

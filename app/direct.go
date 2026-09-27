@@ -9,11 +9,11 @@ import (
 	authui "github.com/buildset/buildset/auth/ui"
 	"github.com/buildset/buildset/authz"
 	authzhttpapi "github.com/buildset/buildset/authz/httpapi"
-	"github.com/buildset/buildset/content"
-	contenthttpapi "github.com/buildset/buildset/content/httpapi"
+	"github.com/buildset/buildset/blog/content"
+	contenthttpapi "github.com/buildset/buildset/blog/content/httpapi"
+	"github.com/buildset/buildset/blog/web"
 	"github.com/buildset/buildset/pkg/httpx"
 	"github.com/buildset/buildset/pkg/ref"
-	"github.com/buildset/buildset/web"
 )
 
 // Each adapter below wraps a service layer and calls it in process. A remote adapter speaking HTTP

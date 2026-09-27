@@ -10,9 +10,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/buildset/buildset/content"
-	"github.com/buildset/buildset/content/httpapi"
-	"github.com/buildset/buildset/content/sqlite"
+	"github.com/buildset/buildset/blog/content"
+	"github.com/buildset/buildset/blog/content/httpapi"
+	"github.com/buildset/buildset/blog/content/sqlite"
 	"github.com/buildset/buildset/pkg/api/contentapi"
 	"github.com/buildset/buildset/pkg/httpx"
 	"github.com/stretchr/testify/assert"

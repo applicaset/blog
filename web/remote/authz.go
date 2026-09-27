@@ -4,7 +4,7 @@ import (
 	"context"
 
 	authzclient "github.com/buildset/buildset/authz/client"
-	"github.com/buildset/buildset/web"
+	"github.com/buildset/buildset/blog/web"
 )
 
 // Authz satisfies web.Authz by calling the authorization service.

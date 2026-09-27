@@ -13,9 +13,9 @@ import (
 	"github.com/buildset/buildset/authz"
 	authzpostgres "github.com/buildset/buildset/authz/postgres"
 	authzsqlite "github.com/buildset/buildset/authz/sqlite"
-	"github.com/buildset/buildset/content"
-	contentpostgres "github.com/buildset/buildset/content/postgres"
-	contentsqlite "github.com/buildset/buildset/content/sqlite"
+	"github.com/buildset/buildset/blog/content"
+	contentpostgres "github.com/buildset/buildset/blog/content/postgres"
+	contentsqlite "github.com/buildset/buildset/blog/content/sqlite"
 )
 
 // administratorRole is the application's vocabulary; authz only stores the string.
