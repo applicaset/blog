@@ -37,7 +37,7 @@ type UpdatePostRequest struct {
 	ContentType string
 }
 
-// CreatePost always produces a draft. Publishing is a separate, deliberate step.
+// CreatePost always produces a draft. Publishing is a separate call.
 func (s *Service) CreatePost(ctx context.Context, req CreatePostRequest) (*Post, error) {
 	if err := ref.Validate(req.AuthorRef); err != nil {
 		return nil, fmt.Errorf("%w: author: %w", ErrInvalidPost, err)
