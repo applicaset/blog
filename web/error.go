@@ -32,6 +32,9 @@ func ErrorFromCode(code httpx.Code, message string) error {
 		return NewError(ErrInvalidInput, message)
 	case httpx.CodeConflict:
 		return NewError(ErrConflict, message)
+	case httpx.CodeForbidden:
+		// No service the blog calls refuses by role; the blog asks authz itself.
+		return nil
 	default:
 		return nil
 	}
