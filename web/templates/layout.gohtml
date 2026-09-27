@@ -8,9 +8,9 @@
 </head>
 <body>
 <header class="as-header">
-    <div class="mx-auto flex max-w-2xl flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 py-4">
+    <div class="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 py-4">
         <p><a href="{{ path "/" }}" class="font-semibold no-underline">{{ .SiteTitle }}</a></p>
-        <nav class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted [&_a]:no-underline [&_a:hover]:text-fg">
+        <nav class="flex flex-wrap items-center gap-x-4 gap-y-1 text-muted [&_a]:no-underline [&_a:hover]:text-fg">
             {{ if .CurrentUser }}
                 <span class="hidden sm:inline">Signed in as {{ with .CurrentUser.Name }}{{ . }}{{ else }}{{ .CurrentUser.Username }}{{ end }}</span>
                 {{ if .CanSeeAdmin }}<a href="{{ path "/admin" }}">Admin</a>{{ end }}
@@ -23,7 +23,7 @@
         </nav>
     </div>
 </header>
-<main class="mx-auto flex max-w-2xl flex-col gap-6 px-4 py-10">
+<main class="mx-auto flex max-w-5xl flex-col gap-6 px-4 py-10">
     {{ with .AdminTabs }}
         <nav aria-label="Administration" class="as-tabs">
             {{ range . }}<a href="{{ .URL }}" class="as-tab"{{ if .Active }} aria-current="page"{{ end }}>{{ .Label }}</a>{{ end }}

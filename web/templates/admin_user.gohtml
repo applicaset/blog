@@ -1,5 +1,5 @@
 {{ define "content" }}
-<dl class="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 text-sm">
+<dl class="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2">
     <dt class="text-muted">Username</dt><dd>{{ .User.Username }}</dd>
     <dt class="text-muted">Name</dt><dd>{{ .User.Name }}</dd>
 </dl>
@@ -8,7 +8,7 @@
 {{ if .CanAssign }}
     <form method="post" action="{{ path "/admin/users/" }}{{ .User.ID }}/roles" class="flex flex-col gap-4">
         <fieldset class="flex flex-col gap-3">
-            <legend class="mb-3 text-sm font-medium">Roles</legend>
+            <legend class="mb-3 font-medium">Roles</legend>
             {{ $held := .HeldRoles }}
             {{ range .AllRoles }}
                 <label class="as-check"><input type="checkbox" name="roles" value="{{ . }}" {{ if has $held . }}checked{{ end }}> {{ . }}</label>
@@ -17,7 +17,7 @@
         <div><button type="submit" class="as-button">Save roles</button></div>
     </form>
 {{ else }}
-    <p class="text-sm"><span class="text-muted">Roles:</span> {{ range .HeldRoles }}{{ . }} {{ else }}none{{ end }}</p>
+    <p><span class="text-muted">Roles:</span> {{ range .HeldRoles }}{{ . }} {{ else }}none{{ end }}</p>
 {{ end }}
 {{ if .CanDelete }}
     <div class="border-t border-border pt-6">

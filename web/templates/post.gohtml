@@ -1,5 +1,5 @@
 {{ define "content" }}
-<article class="flex flex-col gap-5">
+<article class="flex max-w-prose flex-col gap-5">
     {{ with .Post.PublishedAt }}<p class="text-sm text-muted"><time datetime="{{ .Format "2006-01-02" }}">{{ .Format "2 January 2006" }}</time></p>{{ end }}
     {{ if ne .Post.Status "published" }}<p class="as-alert variant-warning">This post is a {{ .Post.Status }}.</p>{{ end }}
     <div class="flex flex-col gap-5 text-base leading-7 sm:text-lg sm:leading-8">{{ .Body }}</div>
