@@ -8,8 +8,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TestFirstRunToPublishedPost is the journey that has to work for the software to be worth
-// running: an empty instance becomes a blog with something on it that a stranger can read.
+// TestFirstRunToPublishedPost covers the core journey: an empty instance becomes a blog with a post
+// a stranger can read.
 func TestFirstRunToPublishedPost(t *testing.T) {
 	forEachTopology(t, firstRunToPublishedPost)
 }
@@ -28,7 +28,7 @@ func firstRunToPublishedPost(t *testing.T, h *harness) {
 	fill(t, admin, "Password", "correct horse battery")
 	click(t, admin, "Create administrator")
 
-	// The first account is an administrator, which is the only reason this link is here.
+	// This link is here only because the first account is an administrator.
 	require.NoError(
 		t,
 		admin.GetByRole("link", playwright.PageGetByRoleOptions{Name: "Admin"}).WaitFor(),
@@ -39,7 +39,7 @@ func firstRunToPublishedPost(t *testing.T, h *harness) {
 	fill(t, admin, "Body", "First paragraph.\n\nSecond paragraph.")
 	click(t, admin, "Create draft")
 
-	// A draft is not visible to anyone else, and looks like nothing at all.
+	// A draft is invisible to anyone else. The home page shows no trace of it.
 	stranger := h.newPage(t)
 	response := h.openSite(t, stranger, "/")
 	require.Equal(t, 200, response.Status())
@@ -63,8 +63,8 @@ func firstRunToPublishedPost(t *testing.T, h *harness) {
 	assert.Contains(t, body, "Second paragraph.")
 }
 
-// TestSignedInReaderHasNoAdministration checks the other half: having an account is not having
-// access.
+// TestSignedInReaderHasNoAdministration checks that having an account does not grant
+// administration access.
 func TestSignedInReaderHasNoAdministration(t *testing.T) {
 	forEachTopology(t, signedInReaderHasNoAdministration)
 }

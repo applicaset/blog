@@ -16,8 +16,8 @@ import (
 	"github.com/buildset/buildset/pkg/ref"
 )
 
-// Each adapter below wraps a service layer and calls it in process. A remote adapter speaking HTTP
-// satisfies the same interface, so nothing in web changes.
+// Each adapter below calls a service layer in process. web/remote satisfies the same interfaces
+// over HTTP, so web does not change between topologies.
 
 type directAuth struct {
 	service *auth.Service
@@ -259,9 +259,8 @@ func toWebPost(post *content.Post) *web.Post {
 	}
 }
 
-// The translators below classify with the same functions the HTTP APIs use, so this binary and the
-// split one turn a given failure into the same sentinel and sentence. Anything unclassified passes
-// through, and the site treats it as a failure of the system.
+// The translators below use the same classifiers as the HTTP APIs. Both topologies turn a failure
+// into the same sentinel and sentence. Anything unclassified passes through as a system failure.
 
 func translateAuthError(err error) error {
 	return translate(err, authhttpapi.Classify)

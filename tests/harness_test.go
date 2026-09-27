@@ -34,8 +34,8 @@ var installOnce sync.Once
 const installBrowserEnvVar = "E2E_INSTALL_BROWSER"
 
 // startPlaywright returns a running driver, or the reason these tests cannot run. The browser is
-// around 200 MB, so CI should install and cache it as a step of its own; set E2E_INSTALL_BROWSER=1
-// to have the tests download it instead.
+// about 200 MB, so CI should install and cache it in its own step. E2E_INSTALL_BROWSER=1 makes the
+// tests download it instead.
 func startPlaywright() (*playwright.Playwright, error) {
 	pw, err := playwright.Run()
 	if err == nil {
@@ -123,8 +123,7 @@ func newMonoHarness(t *testing.T) *harness {
 const topologyEnvVar = "E2E_TOPOLOGY"
 
 // forEachTopology runs a scenario against the single binary and against the four services behind a
-// gateway. The claim a split makes is that it behaves the same way, and one set of tests against
-// both is what checks it.
+// gateway. One set of tests checks that the split behaves the same.
 func forEachTopology(t *testing.T, scenario func(*testing.T, *harness)) {
 	t.Helper()
 
@@ -139,7 +138,7 @@ func forEachTopology(t *testing.T, scenario func(*testing.T, *harness)) {
 	}
 }
 
-// newPage opens a fresh browser context, which is a browser with its own cookie jar.
+// newPage opens a fresh browser context with its own cookie jar.
 func (h *harness) newPage(t *testing.T) playwright.Page {
 	t.Helper()
 

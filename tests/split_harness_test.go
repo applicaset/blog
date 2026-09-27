@@ -34,9 +34,9 @@ const identityPrefix = "/auth/"
 // blogPath is where the gateway mounts the blog, as the Caddyfile does.
 const blogPath = "/blog"
 
-// newSplitHarness boots the four services behind a proxy carrying the gateway's routing, so the
-// browser sees one origin as it does in compose. They share one SQLite file, which is not how they
-// are deployed, but what a split breaks is the boundary between the processes.
+// newSplitHarness boots the four services behind a proxy with the gateway's routing, so the browser
+// sees one origin, as in compose. They share one SQLite file, unlike a deployment. That is enough:
+// a split breaks at the boundaries between processes, not in storage.
 func newSplitHarness(t *testing.T) *harness {
 	t.Helper()
 
@@ -59,8 +59,8 @@ func newSplitHarness(t *testing.T) *harness {
 	return &harness{url: gateway.URL, site: blogPath, browser: browser}
 }
 
-// newGateway is the Caddyfile in thirty lines: the identity paths to one service, the blog under
-// its prefix with the prefix stripped, and the root redirected to the blog.
+// newGateway reproduces the Caddyfile: the identity paths to one service, the blog under its prefix
+// with the prefix stripped, and the root redirected to the blog.
 func newGateway(t *testing.T, authURL, webURL string) http.Handler {
 	t.Helper()
 

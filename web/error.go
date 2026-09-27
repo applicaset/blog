@@ -21,9 +21,9 @@ func (e *Error) Unwrap() error {
 	return e.Kind
 }
 
-// ErrorFromCode turns a wire code into the sentinel this package uses, keeping the message the
-// service wrote for the visitor. It lives here so both adapters map onto them the same way. An
-// unknown code becomes nil, and the caller must keep treating it as a failure of the system.
+// ErrorFromCode turns a wire code into this package's sentinel and keeps the service's message for
+// the visitor. Both adapters use it, so they map codes the same way. An unknown code returns nil,
+// and the caller must treat it as a system failure.
 func ErrorFromCode(code httpx.Code, message string) error {
 	switch code {
 	case httpx.CodeNotFound:

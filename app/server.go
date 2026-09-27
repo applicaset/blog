@@ -10,8 +10,8 @@ import (
 	"github.com/buildset/buildset/blog/web"
 )
 
-// Routes mounts every service handler. Health probes and middleware are not here: pkg/serve owns
-// those, so this binary and the split ones answer them identically.
+// Routes mounts every service handler. pkg/serve adds health probes and middleware, so this binary
+// and the split ones answer them identically.
 func Routes(cfg *Config, svc *services, logger *slog.Logger) (http.Handler, error) {
 	mux := http.NewServeMux()
 

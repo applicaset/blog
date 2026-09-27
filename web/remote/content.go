@@ -85,8 +85,8 @@ func (c *Content) DeletePost(ctx context.Context, id string) error {
 	return translate(c.client.DeletePost(ctx, id))
 }
 
-// Computed here rather than asked for: it is a pure function using the content service's own rules,
-// so a round trip would buy nothing and make every page wait on another process.
+// Computed locally with the content service's own rules. A round trip would add nothing and make
+// every page wait on another process.
 func (c *Content) RenderBody(_ context.Context, post *web.Post) (template.HTML, error) {
 	rendered, err := render.HTML(post.ContentType, post.Body)
 	if err != nil {

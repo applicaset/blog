@@ -61,8 +61,8 @@ func (s *Server) newPostForm(w http.ResponseWriter, r *http.Request) {
 	s.render(w, r, http.StatusOK, "admin_post_form.gohtml", data)
 }
 
-// Ownership is a set of grants rather than a comparison in a handler, which keeps authorization in
-// one service.
+// Ownership is a set of grants, not a comparison in a handler. That keeps authorization in one
+// service.
 func (s *Server) createPost(w http.ResponseWriter, r *http.Request) {
 	user, ok := s.requirePermission(w, r, ActionPostCreate, anyPostResource)
 	if !ok {
@@ -92,9 +92,9 @@ func (s *Server) createPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// The grant needs the post's reference, so it cannot come first. If it still fails, the post
-	// exists and its author cannot edit it: saying "something went wrong" would invite a second
-	// submission, so the message says what actually happened.
+	// The grant needs the post's reference, so it cannot come first. If it fails, the post exists
+	// but its author cannot edit it. The message says so, because "something went wrong" would
+	// invite a duplicate submission.
 	if err := s.grantPostOwnership(r, user.Ref, post.Ref); err != nil {
 		s.logger.ErrorContext(r.Context(), "grant post ownership",
 			slog.String("user_ref", user.Ref),
@@ -220,9 +220,9 @@ func (s *Server) deletePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Two services cannot share a transaction, so grants go first: a post whose grants are gone can
-	// be deleted again by an administrator, whose access comes from their role. The other order
-	// leaves grants behind that a reused identifier would eventually match.
+	// Grants go first because two services cannot share a transaction. A post without grants can
+	// still be deleted by an administrator through their role. The other order leaves stale grants
+	// that a reused identifier would eventually match.
 	if err := s.deps.Authz.PurgeResource(r.Context(), post.Ref); err != nil {
 		s.renderInternalError(w, r, err, "purge post grants")
 

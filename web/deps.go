@@ -7,9 +7,9 @@ import (
 	"time"
 )
 
-// The interfaces below are what this site needs from the rest of the system. They use types
-// declared here rather than another service's structs, so an implementation that talks HTTP can
-// satisfy them without importing it. The composition root supplies the implementations.
+// The interfaces below are what this site needs from other services. They use types declared here,
+// not another service's structs, so an HTTP implementation need not import that service. The
+// composition root supplies the implementations.
 
 // User is what this site needs to know about a person. It holds no credentials.
 type User struct {
@@ -67,8 +67,8 @@ type Auth interface {
 	// NewUserURL is the form for adding an account; this site never renders one.
 	NewUserURL(next string) string
 	SetupURL(next string) string
-	// LoginURL is a method rather than a constant so an authorization-code flow could return a very
-	// different URL without anything here changing.
+	// LoginURL is a method, not a constant, so an authorization-code flow can return a different URL
+	// without changes here.
 	LoginURL(next string) string
 	LogoutURL(next string) string
 	PasswordURL(next string) string

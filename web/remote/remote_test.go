@@ -26,9 +26,8 @@ func newAuth(t *testing.T, handler http.HandlerFunc) *remote.Auth {
 	return remote.NewAuth(client, remote.DefaultURLs())
 }
 
-// This is the contract, from the other end. web/session.go signs a visitor out only when it gets
-// ErrNotFound, and returns 503 for anything else. If a failure ever produced ErrNotFound, an
-// outage would silently sign everybody out.
+// web/session.go signs a visitor out only on ErrNotFound and returns 503 for anything else. If a
+// failure produced ErrNotFound, an outage would silently sign everybody out.
 func TestResolveSessionOnlyReportsNotFoundWhenTheServiceSaidSo(t *testing.T) {
 	tests := []struct {
 		name        string

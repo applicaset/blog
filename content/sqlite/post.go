@@ -61,7 +61,7 @@ func (r *Repository) InsertPost(ctx context.Context, post *content.Post) error {
 	return nil
 }
 
-// UpdatePost deliberately leaves author_ref alone: ownership is immutable.
+// UpdatePost never changes author_ref: ownership is immutable.
 func (r *Repository) UpdatePost(ctx context.Context, post *content.Post) error {
 	result, err := r.builder().
 		Update(tablePosts).

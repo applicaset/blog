@@ -34,7 +34,7 @@ const (
 	StatusArchived  Status = "archived"
 )
 
-// A post leaves the archive as a draft, so republishing is deliberate rather than a side effect of
+// A post leaves the archive as a draft. Republishing takes its own step, not a side effect of
 // unarchiving.
 var transitions = map[Status][]Status{
 	StatusDraft:     {StatusPublished, StatusArchived},

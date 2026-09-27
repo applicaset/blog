@@ -85,7 +85,7 @@ func LoadConfig(ctx context.Context) (*Config, error) {
 	return cfg, nil
 }
 
-// Keeping these configurable makes moving a page a setting rather than a release of two binaries.
+// Configurable, so moving a page is a setting change, not a release of two binaries.
 func loadURLs() remote.URLs {
 	defaults := remote.DefaultURLs()
 
@@ -175,9 +175,8 @@ func Run(ctx context.Context) error {
 		ShutdownTimeout: cfg.ShutdownTimeout,
 		Logger:          logger,
 		Routes:          site.Routes(),
-		// Ready is deliberately nil. Following a dependency's readiness would make restarting the
-		// identity service leave the gateway nothing to route to. A dependency being down is
-		// answered per request.
+		// Ready is nil on purpose. If it followed dependencies, restarting the identity service
+		// would leave the gateway nothing to route to. A down dependency is handled per request.
 		Ready: nil,
 		// A browser posts forms here, so cross-origin protection applies and an inbound request
 		// identifier must not be trusted.

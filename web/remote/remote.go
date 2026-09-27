@@ -10,9 +10,9 @@ import (
 	"github.com/buildset/buildset/pkg/httpx"
 )
 
-// translate turns a domain failure into the sentinel the site matches on and leaves everything
-// else alone. That second half matters: the site treats a visitor as anonymous only when the
-// identity service said so, which holds only while an unreachable one cannot yield ErrNotFound.
+// translate turns a domain failure into the sentinel the site matches on. Everything else passes
+// through unchanged: if an unreachable identity service yielded ErrNotFound, the site would treat
+// every visitor as anonymous.
 func translate(err error) error {
 	if err == nil {
 		return nil

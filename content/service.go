@@ -187,8 +187,8 @@ func (s *Service) RenderBody(post *Post) (template.HTML, error) {
 	return RenderHTML(post.ContentType, post.Body)
 }
 
-// currentTime is truncated to the precision the stored timestamps keep, so a value held in memory
-// and the same value read back from storage compare equal.
+// currentTime is truncated to the precision storage keeps, so an in-memory value equals the same
+// value read back.
 func currentTime() time.Time {
 	return time.Now().UTC().Truncate(time.Millisecond)
 }

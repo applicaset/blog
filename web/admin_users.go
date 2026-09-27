@@ -263,9 +263,8 @@ func (s *Server) deleteUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Roles and grants go first, for the same reason as deleting a post: an account stripped of its
-	// roles can be deleted again, while roles left behind would apply to whoever got that reference
-	// next.
+	// Roles and grants go first, as when deleting a post. An account without roles can still be
+	// deleted again. Roles left behind would apply to whoever got that reference next.
 	if err := s.deps.Authz.PurgeSubject(r.Context(), subject.Ref); err != nil {
 		s.renderInternalError(w, r, err, "purge user grants")
 

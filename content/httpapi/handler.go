@@ -1,5 +1,5 @@
-// Package httpapi serves the content service over HTTP. Rendering a body is deliberately not an
-// operation here: it is a pure function, so a consumer renders locally through content/render.
+// Package httpapi serves the content service over HTTP. It has no render operation on purpose:
+// rendering is a pure function, so a consumer calls content/render locally.
 package httpapi
 
 import (

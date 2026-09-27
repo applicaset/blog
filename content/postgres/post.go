@@ -61,7 +61,7 @@ func (r *Repository) InsertPost(ctx context.Context, post *content.Post) error {
 	return nil
 }
 
-// UpdatePost deliberately leaves author_ref alone: ownership is immutable.
+// UpdatePost never changes author_ref: ownership is immutable.
 func (r *Repository) UpdatePost(ctx context.Context, post *content.Post) error {
 	result, err := r.builder().
 		Update(tablePosts).
@@ -167,8 +167,7 @@ func scanPost(row rowScanner, notFound error) (*content.Post, error) {
 
 	post.Status = content.Status(status)
 
-	// A timestamptz comes back in the session's time zone; everything above this layer wants an
-	// instant.
+	// A timestamptz comes back in the session's time zone. Everything above this layer expects UTC.
 	post.CreatedAt = post.CreatedAt.UTC()
 	post.UpdatedAt = post.UpdatedAt.UTC()
 

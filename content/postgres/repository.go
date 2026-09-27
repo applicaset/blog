@@ -35,8 +35,8 @@ func NewRepository(ctx context.Context, db *sql.DB) (*Repository, error) {
 	return &Repository{db: db}, nil
 }
 
-// The only place this package names a placeholder style; letting it number them keeps the filtered
-// listing from doing so by hand.
+// The only place this package names a placeholder style. squirrel numbers the $n placeholders, so
+// the filtered listing does not have to.
 func (r *Repository) builder() squirrel.StatementBuilderType {
 	return squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar).RunWith(r.db)
 }

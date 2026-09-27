@@ -177,8 +177,8 @@ func TestEditingSomeoneElsesPostIsRefused(t *testing.T) {
 	)
 }
 
-// This is where ownership is actually established. Without these grants the author of a new post
-// could not read, edit, publish, or delete it afterwards.
+// Creating a post is where ownership is established. Without these grants its author could not
+// read, edit, publish, or delete it.
 func TestCreatingAPostGrantsItsAuthorOwnership(t *testing.T) {
 	h := newHarness(t)
 	h.authz.allow(adaRef, web.ActionPostCreate, "urn:content:post:*")

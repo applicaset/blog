@@ -2,9 +2,9 @@ package remote
 
 import "github.com/buildset/buildset/pkg/safeurl"
 
-// URLs are the identity service's pages. They are configuration rather than calls so rendering a
-// page never stalls on a round trip, and they stay relative because the gateway puts both services
-// on one origin, which is what keeps the session cookie and the same-origin checks working.
+// URLs are the identity service's pages. They are configuration, not calls, so rendering never
+// waits on a round trip. They stay relative because the gateway serves both services on one
+// origin, which the session cookie and the same-origin checks depend on.
 type URLs struct {
 	Setup    string
 	Login    string

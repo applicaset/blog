@@ -9,8 +9,8 @@ import (
 	"github.com/buildset/buildset/pkg/storage"
 )
 
-// Stores holds one handle per service. Under SQLite they are the same file; under Postgres they are
-// separate pools because search_path belongs to a connection and connections are pooled.
+// Stores holds one handle per service. Under SQLite they share one file. Under Postgres each gets
+// its own pool, because search_path is set per connection and connections are pooled.
 type Stores struct {
 	Auth    *sql.DB
 	Authz   *sql.DB
@@ -27,7 +27,7 @@ func OpenStores(ctx context.Context, cfg DatabaseConfig) (*Stores, error) {
 			return nil, err
 		}
 
-		// One file for all three; the boundary is a convention, not something the database enforces.
+		// One file for all three. Only convention keeps the services apart; the database does not.
 		return &Stores{Auth: db, Authz: db, Content: db, closers: []*sql.DB{db}}, nil
 	}
 

@@ -106,8 +106,8 @@ func Run(t *testing.T, newRepository New) {
 
 		base := time.Date(2026, 3, 1, 12, 0, 0, 0, time.UTC)
 
-		// Two posts share a timestamp so the id tiebreak decides, with ids that differ by
-		// punctuation, which is where a locale collation would disagree with byte order.
+		// Two posts share a timestamp, so the id tiebreak decides. The ids differ by punctuation,
+		// where a locale collation disagrees with byte order.
 		first := post(alice, "Oldest", content.StatusDraft)
 		first.ID, first.CreatedAt = "aa-bb", base
 

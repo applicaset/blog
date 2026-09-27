@@ -1,6 +1,6 @@
-// Package render turns a stored post body into a fragment safe to place inside a page. It is a leaf
-// on purpose: no repository and no service, so a site running against a remote content service can
-// render locally with these exact rules.
+// Package render turns a stored post body into a fragment safe to place inside a page. It must not
+// import a repository or a service, so a site using a remote content service renders locally with
+// the same rules.
 package render
 
 import (

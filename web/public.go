@@ -16,8 +16,7 @@ type postContent struct {
 }
 
 func (s *Server) index(w http.ResponseWriter, r *http.Request) {
-	// An instance with no users has nothing to show and nobody to show it to, so the first visitor
-	// is sent to set it up.
+	// An instance with no users has nothing to show, so the first visitor is sent to set it up.
 	open, err := s.deps.Auth.SetupOpen(r.Context())
 	if err != nil {
 		s.renderInternalError(w, r, err, "check setup state")
