@@ -7,15 +7,17 @@ import (
 	"log/slog"
 
 	"github.com/buildset/buildset/auth"
-	"github.com/buildset/buildset/auth/hash"
+	"github.com/buildset/buildset/auth/kit"
 	authpostgres "github.com/buildset/buildset/auth/postgres"
 	authsqlite "github.com/buildset/buildset/auth/sqlite"
+	authui "github.com/buildset/buildset/auth/ui"
 	"github.com/buildset/buildset/authz"
 	authzpostgres "github.com/buildset/buildset/authz/postgres"
 	authzsqlite "github.com/buildset/buildset/authz/sqlite"
 	"github.com/buildset/buildset/blog/content"
 	contentpostgres "github.com/buildset/buildset/blog/content/postgres"
 	contentsqlite "github.com/buildset/buildset/blog/content/sqlite"
+	"github.com/buildset/buildset/blog/web"
 )
 
 // administratorRole is the application's vocabulary; authz only stores the string.
@@ -24,9 +26,10 @@ const administratorRole = "admin"
 // services holds every service this binary runs. Each is built from its own backend and never sees
 // the others' packages.
 type services struct {
-	auth    *auth.Service
-	authz   *authz.Service
-	content *content.Service
+	auth      *auth.Service
+	authPages *authui.Handler
+	authz     *authz.Service
+	content   *content.Service
 }
 
 func newServices(
@@ -35,18 +38,6 @@ func newServices(
 	stores *Stores,
 	logger *slog.Logger,
 ) (*services, error) {
-	bcryptAlgorithm, err := hash.NewBcrypt(cfg.Auth.BcryptCost)
-	if err != nil {
-		return nil, fmt.Errorf("build bcrypt algorithm: %w", err)
-	}
-
-	// TODO: register argon2id here and prefer it once implemented. Existing bcrypt hashes keep
-	// verifying, and each user is upgraded on their next login.
-	passwords, err := hash.NewRegistry(bcryptAlgorithm)
-	if err != nil {
-		return nil, fmt.Errorf("build password registry: %w", err)
-	}
-
 	authRepository, err := newAuthRepository(ctx, cfg.Database.Driver, stores.Auth)
 	if err != nil {
 		return nil, fmt.Errorf("build auth repository: %w", err)
@@ -74,15 +65,27 @@ func newServices(
 		return nil
 	})
 
-	authService, err := auth.NewService(
-		authRepository,
-		passwords,
-		firstUserHook,
-		cfg.Auth.SessionTTL,
-		logger,
-	)
+	registrationPolicy := authui.SwitchPolicy{
+		Open: cfg.Auth.RegistrationOpen,
+		CanAddUser: func(ctx context.Context, actorRef string) (bool, error) {
+			return authzService.Can(ctx, actorRef, web.ActionUserCreate, web.AnyUserResource)
+		},
+	}
+
+	authService, authPages, err := kit.Build(kit.Options{
+		Config:        cfg.Auth,
+		Repository:    authRepository,
+		FirstUserHook: firstUserHook,
+		Registration:  registrationPolicy,
+		Cookie: authui.Config{
+			SessionCookieName: cfg.SessionCookieName,
+			SecureCookies:     cfg.SecureCookies,
+		},
+		Mailer: cfg.Mailer,
+		Logger: logger,
+	})
 	if err != nil {
-		return nil, fmt.Errorf("build auth service: %w", err)
+		return nil, err
 	}
 
 	contentRepository, err := newContentRepository(ctx, cfg.Database.Driver, stores.Content)
@@ -91,9 +94,10 @@ func newServices(
 	}
 
 	return &services{
-		auth:    authService,
-		authz:   authzService,
-		content: content.NewService(contentRepository),
+		auth:      authService,
+		authPages: authPages,
+		authz:     authzService,
+		content:   content.NewService(contentRepository),
 	}, nil
 }
 

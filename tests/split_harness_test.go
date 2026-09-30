@@ -15,21 +15,17 @@ import (
 	"time"
 
 	authapp "github.com/buildset/buildset/auth/app"
+	authui "github.com/buildset/buildset/auth/ui"
 	authzapp "github.com/buildset/buildset/authz/app"
 	contentapp "github.com/buildset/buildset/blog/content/app"
 	webapp "github.com/buildset/buildset/blog/web/app"
 	"github.com/buildset/buildset/blog/web/remote"
 	"github.com/buildset/buildset/pkg/config"
+	"github.com/buildset/buildset/pkg/mail"
 	"github.com/buildset/buildset/pkg/serve"
 	"github.com/buildset/buildset/pkg/storage"
 	"github.com/stretchr/testify/require"
 )
-
-// identityPaths are the paths the gateway sends to the identity service. They are the same list
-// the Caddyfile carries, and they are exact matches rather than prefixes, apart from identityPrefix.
-var identityPaths = []string{"/setup", "/login", "/logout", "/register", "/users/new", "/password"}
-
-const identityPrefix = "/auth/"
 
 // blogPath is where the gateway mounts the blog, as the Caddyfile does.
 const blogPath = "/blog"
@@ -69,8 +65,10 @@ func newGateway(t *testing.T, authURL, webURL string) http.Handler {
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
-		case slices.Contains(identityPaths, r.URL.Path) ||
-			strings.HasPrefix(r.URL.Path, identityPrefix):
+		case slices.Contains(authui.Paths, r.URL.Path) ||
+			slices.ContainsFunc(authui.Prefixes, func(prefix string) bool {
+				return strings.HasPrefix(r.URL.Path, prefix)
+			}):
 			identity.ServeHTTP(w, r)
 		case r.URL.Path == "/" || r.URL.Path == blogPath:
 			http.Redirect(w, r, blogPath+"/", http.StatusFound)
@@ -140,15 +138,13 @@ func startAuth(t *testing.T, logger *slog.Logger, database storage.Config, authz
 	service, err := authapp.New(context.Background(), &authapp.Config{
 		Port: "8080", ShutdownTimeout: time.Second,
 		// The test server speaks plain HTTP, so a Secure cookie would never come back.
-		Cookie:   config.Cookie{Name: config.SessionCookieName, Secure: false},
-		Database: database,
-		// The lowest cost bcrypt accepts, because these tests sign in repeatedly.
-		BcryptCost:       10,
-		SessionTTL:       time.Hour,
-		RegistrationOpen: true,
-		AdminRole:        "admin",
-		AuthzURL:         authzURL,
-		HTTPTimeout:      5 * time.Second,
+		Cookie:      config.Cookie{Name: config.SessionCookieName, Secure: false},
+		Database:    database,
+		Auth:        testAuthConfig(),
+		Mailer:      &mail.Recorder{},
+		AdminRole:   "admin",
+		AuthzURL:    authzURL,
+		HTTPTimeout: 5 * time.Second,
 	}, logger)
 	require.NoError(t, err)
 	t.Cleanup(func() { _ = service.Close() })

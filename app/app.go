@@ -5,14 +5,12 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
-	"time"
 
+	"github.com/buildset/buildset/auth/kit"
+	authui "github.com/buildset/buildset/auth/ui"
 	"github.com/buildset/buildset/pkg/config"
 	"github.com/buildset/buildset/pkg/serve"
 )
-
-// Expiry is enforced on every lookup; sweeping only keeps the table from growing forever.
-const expiredSessionSweepInterval = time.Hour
 
 // Application is the whole system assembled: configuration, storage, services, and one HTTP
 // handler in front of them.
@@ -60,14 +58,15 @@ func (a *Application) Handler() http.Handler {
 
 func (a *Application) serveOptions() serve.Options {
 	return serve.Options{
-		Name:            "blog",
-		Address:         a.config.Address(),
-		ShutdownTimeout: a.config.ShutdownTimeout,
-		Logger:          a.logger,
-		Routes:          a.routes,
-		Ready:           a.stores.Ping,
-		CrossOrigin:     true,
-		Background:      []func(context.Context){a.SweepExpiredSessions},
+		Name:              "blog",
+		Address:           a.config.Address(),
+		ShutdownTimeout:   a.config.ShutdownTimeout,
+		Logger:            a.logger,
+		Routes:            a.routes,
+		Ready:             a.stores.Ping,
+		CrossOrigin:       true,
+		CrossOriginBypass: authui.CrossOriginBypass,
+		Background:        []func(context.Context){a.Sweep},
 	}
 }
 
@@ -75,28 +74,9 @@ func (a *Application) Close() error {
 	return a.stores.Close()
 }
 
-// SweepExpiredSessions runs until the context is cancelled.
-func (a *Application) SweepExpiredSessions(ctx context.Context) {
-	ticker := time.NewTicker(expiredSessionSweepInterval)
-	defer ticker.Stop()
-
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		case <-ticker.C:
-			deleted, err := a.services.auth.DeleteExpiredSessions(ctx)
-			if err != nil {
-				a.logger.WarnContext(ctx, "sweep expired sessions", slog.Any("error", err))
-
-				continue
-			}
-
-			if deleted > 0 {
-				a.logger.InfoContext(ctx, "swept expired sessions", slog.Int64("count", deleted))
-			}
-		}
-	}
+// Sweep deletes expired sessions and tokens until the context is cancelled.
+func (a *Application) Sweep(ctx context.Context) {
+	kit.Sweep(ctx, a.services.auth, a.logger)
 }
 
 func Run(ctx context.Context) error {

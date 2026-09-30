@@ -24,6 +24,7 @@ func firstRunToPublishedPost(t *testing.T, h *harness) {
 	require.Contains(t, admin.URL(), "/setup")
 
 	fill(t, admin, "Username", "ada")
+	fill(t, admin, "Email", "ada@example.com")
 	fill(t, admin, "Display name", "Ada Lovelace")
 	fill(t, admin, "Password", "correct horse battery")
 	click(t, admin, "Create administrator")
@@ -75,6 +76,7 @@ func signedInReaderHasNoAdministration(t *testing.T, h *harness) {
 	admin := h.newPage(t)
 	h.open(t, admin, "/setup")
 	fill(t, admin, "Username", "ada")
+	fill(t, admin, "Email", "ada@example.com")
 	fill(t, admin, "Display name", "Ada Lovelace")
 	fill(t, admin, "Password", "correct horse battery")
 	click(t, admin, "Create administrator")
@@ -82,6 +84,7 @@ func signedInReaderHasNoAdministration(t *testing.T, h *harness) {
 	reader := h.newPage(t)
 	h.open(t, reader, "/register")
 	fill(t, reader, "Username", "grace")
+	fill(t, reader, "Email", "grace@example.com")
 	fill(t, reader, "Display name", "Grace Hopper")
 	fill(t, reader, "Password", "another good secret")
 	click(t, reader, "Create account")

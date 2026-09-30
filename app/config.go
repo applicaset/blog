@@ -2,11 +2,10 @@ package app
 
 import (
 	"context"
-	"errors"
-	"fmt"
 	"log/slog"
-	"time"
 
+	"github.com/buildset/buildset/auth"
+	"github.com/buildset/buildset/auth/kit"
 	"github.com/buildset/buildset/pkg/config"
 	"github.com/buildset/buildset/pkg/storage"
 	"github.com/nasermirzaei89/env"
@@ -22,8 +21,6 @@ const (
 	DriverPostgres = storage.DriverPostgres
 )
 
-var errInvalidConfig = errors.New("invalid configuration")
-
 type DatabaseConfig = storage.Config
 
 type Config struct {
@@ -37,13 +34,12 @@ type Config struct {
 	BasePath          string
 	Database          DatabaseConfig
 	Auth              AuthConfig
+	// Mailer replaces the SMTP sender Auth.Mail describes. Tests set it to read what was sent.
+	Mailer auth.Mailer
 }
 
-type AuthConfig struct {
-	BcryptCost       int
-	SessionTTL       time.Duration
-	RegistrationOpen bool
-}
+// AuthConfig is shared with the identity binary, which reads the same variables.
+type AuthConfig = kit.Config
 
 func LoadConfig(ctx context.Context) (*Config, error) {
 	log, err := config.LoadLog()
@@ -58,6 +54,11 @@ func LoadConfig(ctx context.Context) (*Config, error) {
 		return nil, err
 	}
 
+	authConfig, err := kit.LoadConfig()
+	if err != nil {
+		return nil, err
+	}
+
 	cfg := &Config{
 		Server:            config.LoadServer(),
 		LogLevel:          log.Level,
@@ -67,7 +68,7 @@ func LoadConfig(ctx context.Context) (*Config, error) {
 		SiteTitle:         env.GetString("SITE_TITLE", "Blog"),
 		BasePath:          basePath,
 		Database:          storage.Load(),
-		Auth:              LoadAuthConfig(),
+		Auth:              authConfig,
 	}
 
 	if err := cfg.Validate(ctx); err != nil {
@@ -75,36 +76,6 @@ func LoadConfig(ctx context.Context) (*Config, error) {
 	}
 
 	return cfg, nil
-}
-
-// LoadAuthConfig is shared with the identity binary, which reads the same variables.
-func LoadAuthConfig() AuthConfig {
-	return AuthConfig{
-		BcryptCost:       env.GetInt("AUTH_BCRYPT_COST", 12),
-		SessionTTL:       env.GetDuration("AUTH_SESSION_TTL", 14*24*time.Hour),
-		RegistrationOpen: env.GetBool("AUTH_REGISTRATION_OPEN", true),
-	}
-}
-
-func (c AuthConfig) Validate() error {
-	// bcrypt rejects costs outside [4, 31]; bounding here fails at boot rather than per login.
-	if c.BcryptCost < 10 || c.BcryptCost > 31 {
-		return fmt.Errorf(
-			"%w: AUTH_BCRYPT_COST must be between 10 and 31, got %d",
-			errInvalidConfig,
-			c.BcryptCost,
-		)
-	}
-
-	if c.SessionTTL <= 0 {
-		return fmt.Errorf(
-			"%w: AUTH_SESSION_TTL must be positive, got %s",
-			errInvalidConfig,
-			c.SessionTTL,
-		)
-	}
-
-	return nil
 }
 
 func (c *Config) Validate(ctx context.Context) error {

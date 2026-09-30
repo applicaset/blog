@@ -13,7 +13,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/buildset/buildset/auth/kit"
 	"github.com/buildset/buildset/blog/app"
+	"github.com/buildset/buildset/pkg/mail"
 	"github.com/nasermirzaei89/env"
 	"github.com/playwright-community/playwright-go"
 	"github.com/stretchr/testify/require"
@@ -99,12 +101,8 @@ func newMonoHarness(t *testing.T) *harness {
 			Driver: app.DriverSQLite,
 			Path:   filepath.Join(t.TempDir(), "test.db"),
 		},
-		Auth: app.AuthConfig{
-			// The lowest cost bcrypt accepts, because these tests sign in repeatedly.
-			BcryptCost:       10,
-			SessionTTL:       time.Hour,
-			RegistrationOpen: true,
-		},
+		Auth:   testAuthConfig(),
+		Mailer: &mail.Recorder{},
 	}
 
 	logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelWarn}))
@@ -181,4 +179,15 @@ func click(t *testing.T, page playwright.Page, name string) {
 		t,
 		page.GetByRole("button", playwright.PageGetByRoleOptions{Name: name}).Click(),
 	)
+}
+
+// testAuthConfig uses the lowest cost bcrypt accepts, because these tests sign in repeatedly.
+func testAuthConfig() kit.Config {
+	return kit.Config{
+		BcryptCost:       10,
+		SessionTTL:       time.Hour,
+		RegistrationOpen: true,
+		PublicURL:        "http://localhost",
+		Mail:             mail.Config{From: "test@example.com"},
+	}
 }

@@ -1,12 +1,10 @@
 package app
 
 import (
-	"context"
 	"fmt"
 	"log/slog"
 	"net/http"
 
-	authui "github.com/buildset/buildset/auth/ui"
 	"github.com/buildset/buildset/blog/web"
 )
 
@@ -15,21 +13,7 @@ import (
 func Routes(cfg *Config, svc *services, logger *slog.Logger) (http.Handler, error) {
 	mux := http.NewServeMux()
 
-	registrationPolicy := authui.SwitchPolicy{
-		Open: cfg.Auth.RegistrationOpen,
-		CanAddUser: func(ctx context.Context, actorRef string) (bool, error) {
-			return svc.authz.Can(ctx, actorRef, web.ActionUserCreate, web.AnyUserResource)
-		},
-	}
-
-	authHandler, err := authui.NewHandler(svc.auth, registrationPolicy, authui.Config{
-		SessionCookieName: cfg.SessionCookieName,
-		SecureCookies:     cfg.SecureCookies,
-	}, logger)
-	if err != nil {
-		return nil, fmt.Errorf("build auth handler: %w", err)
-	}
-
+	authHandler := svc.authPages
 	authHandler.Register(mux)
 
 	site, err := web.New(web.Dependencies{
