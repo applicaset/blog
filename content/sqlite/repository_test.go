@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"testing"
 
-	"github.com/applicaset/buildset/blog/content"
 	"github.com/applicaset/buildset/blog/content/repotest"
 	"github.com/applicaset/buildset/blog/content/sqlite"
 	"github.com/stretchr/testify/require"
@@ -12,7 +11,7 @@ import (
 )
 
 func TestRepository(t *testing.T) {
-	repotest.Run(t, func(t *testing.T) content.Repository {
+	repotest.Run(t, func(t *testing.T) repotest.Repositories {
 		t.Helper()
 
 		db, err := sql.Open("sqlite", "file:"+t.TempDir()+"/test.db")
@@ -21,9 +20,8 @@ func TestRepository(t *testing.T) {
 		db.SetMaxOpenConns(1)
 		t.Cleanup(func() { _ = db.Close() })
 
-		repository, err := sqlite.NewRepository(t.Context(), db)
-		require.NoError(t, err)
+		require.NoError(t, sqlite.Migrate(t.Context(), db))
 
-		return repository
+		return repotest.Repositories{Post: sqlite.NewPostRepository(db)}
 	})
 }

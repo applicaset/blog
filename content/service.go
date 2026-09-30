@@ -17,11 +17,11 @@ const (
 )
 
 type Service struct {
-	repository Repository
+	postRepo PostRepository
 }
 
-func NewService(repository Repository) *Service {
-	return &Service{repository: repository}
+func NewService(postRepo PostRepository) *Service {
+	return &Service{postRepo: postRepo}
 }
 
 type CreatePostRequest struct {
@@ -38,7 +38,7 @@ type UpdatePostRequest struct {
 }
 
 // CreatePost always produces a draft. Publishing is a separate call.
-func (s *Service) CreatePost(ctx context.Context, req CreatePostRequest) (*Post, error) {
+func (svc *Service) CreatePost(ctx context.Context, req CreatePostRequest) (*Post, error) {
 	if err := ref.Validate(req.AuthorRef); err != nil {
 		return nil, fmt.Errorf("%w: author: %w", ErrInvalidPost, err)
 	}
@@ -66,15 +66,19 @@ func (s *Service) CreatePost(ctx context.Context, req CreatePostRequest) (*Post,
 		UpdatedAt:   now,
 	}
 
-	if err := s.repository.InsertPost(ctx, post); err != nil {
+	if err := svc.postRepo.Insert(ctx, post); err != nil {
 		return nil, fmt.Errorf("insert post: %w", err)
 	}
 
 	return post, nil
 }
 
-func (s *Service) UpdatePost(ctx context.Context, id string, req UpdatePostRequest) (*Post, error) {
-	post, err := s.GetPost(ctx, id)
+func (svc *Service) UpdatePost(
+	ctx context.Context,
+	id string,
+	req UpdatePostRequest,
+) (*Post, error) {
+	post, err := svc.GetPost(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -94,15 +98,15 @@ func (s *Service) UpdatePost(ctx context.Context, id string, req UpdatePostReque
 	post.ContentType = contentType
 	post.UpdatedAt = currentTime()
 
-	if err := s.repository.UpdatePost(ctx, post); err != nil {
+	if err := svc.postRepo.Update(ctx, post); err != nil {
 		return nil, fmt.Errorf("update post: %w", err)
 	}
 
 	return post, nil
 }
 
-func (s *Service) SetStatus(ctx context.Context, id string, status Status) (*Post, error) {
-	post, err := s.GetPost(ctx, id)
+func (svc *Service) SetStatus(ctx context.Context, id string, status Status) (*Post, error) {
+	post, err := svc.GetPost(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -125,23 +129,23 @@ func (s *Service) SetStatus(ctx context.Context, id string, status Status) (*Pos
 	post.Status = status
 	post.UpdatedAt = currentTime()
 
-	if err := s.repository.UpdatePost(ctx, post); err != nil {
+	if err := svc.postRepo.Update(ctx, post); err != nil {
 		return nil, fmt.Errorf("update post status: %w", err)
 	}
 
 	return post, nil
 }
 
-func (s *Service) DeletePost(ctx context.Context, id string) error {
-	if err := s.repository.DeletePost(ctx, id); err != nil {
+func (svc *Service) DeletePost(ctx context.Context, id string) error {
+	if err := svc.postRepo.Delete(ctx, id); err != nil {
 		return fmt.Errorf("delete post: %w", err)
 	}
 
 	return nil
 }
 
-func (s *Service) GetPost(ctx context.Context, id string) (*Post, error) {
-	post, err := s.repository.GetPost(ctx, id)
+func (svc *Service) GetPost(ctx context.Context, id string) (*Post, error) {
+	post, err := svc.postRepo.Get(ctx, id)
 	if err != nil {
 		return nil, fmt.Errorf("get post: %w", err)
 	}
@@ -149,7 +153,7 @@ func (s *Service) GetPost(ctx context.Context, id string) (*Post, error) {
 	return post, nil
 }
 
-func (s *Service) GetPostByRef(ctx context.Context, postRef string) (*Post, error) {
+func (svc *Service) GetPostByRef(ctx context.Context, postRef string) (*Post, error) {
 	parsed, err := ref.Parse(postRef)
 	if err != nil {
 		return nil, err
@@ -159,10 +163,10 @@ func (s *Service) GetPostByRef(ctx context.Context, postRef string) (*Post, erro
 		return nil, fmt.Errorf("%w: %s is not a post reference", ErrPostNotFound, postRef)
 	}
 
-	return s.GetPost(ctx, parsed.ID)
+	return svc.GetPost(ctx, parsed.ID)
 }
 
-func (s *Service) ListPosts(ctx context.Context, filter PostFilter) ([]Post, error) {
+func (svc *Service) ListPosts(ctx context.Context, filter PostFilter) ([]Post, error) {
 	if filter.Status != "" {
 		if _, ok := transitions[filter.Status]; !ok {
 			return nil, fmt.Errorf("%w: %q", ErrInvalidStatus, filter.Status)
@@ -175,7 +179,7 @@ func (s *Service) ListPosts(ctx context.Context, filter PostFilter) ([]Post, err
 
 	filter.Limit = min(filter.Limit, maxPostLimit)
 
-	posts, err := s.repository.ListPosts(ctx, filter)
+	posts, err := svc.postRepo.List(ctx, filter)
 	if err != nil {
 		return nil, fmt.Errorf("list posts: %w", err)
 	}
@@ -183,7 +187,7 @@ func (s *Service) ListPosts(ctx context.Context, filter PostFilter) ([]Post, err
 	return posts, nil
 }
 
-func (s *Service) RenderBody(post *Post) (template.HTML, error) {
+func (svc *Service) RenderBody(post *Post) (template.HTML, error) {
 	return RenderHTML(post.ContentType, post.Body)
 }
 

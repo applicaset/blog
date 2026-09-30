@@ -1,4 +1,4 @@
-// Package repotest is the contract every content.Repository must satisfy. Both backends run it, so
+// Package repotest is the contract every content repository must satisfy. Both backends run it, so
 // a behaviour that differs between SQLite and Postgres fails here rather than in production.
 package repotest
 
@@ -13,8 +13,12 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// New builds a repository over empty storage.
-type New func(t *testing.T) content.Repository
+type Repositories struct {
+	Post content.PostRepository
+}
+
+// New builds repositories over empty storage, once per subtest, so no test sees another's rows.
+type New func(t *testing.T) Repositories
 
 const (
 	alice = "urn:auth:user:alice"
@@ -22,41 +26,41 @@ const (
 )
 
 // Run exercises the whole contract.
-func Run(t *testing.T, newRepository New) {
+func Run(t *testing.T, newRepositories New) {
 	t.Helper()
 
-	t.Run("GetPost reports a missing post", func(t *testing.T) {
-		repository := newRepository(t)
+	t.Run("Post.Get reports a missing post", func(t *testing.T) {
+		repos := newRepositories(t)
 
-		_, err := repository.GetPost(context.Background(), uuid.NewV7().String())
+		_, err := repos.Post.Get(context.Background(), uuid.NewV7().String())
 		require.ErrorIs(t, err, content.ErrPostNotFound)
 	})
 
-	t.Run("UpdatePost reports a missing post", func(t *testing.T) {
-		repository := newRepository(t)
+	t.Run("Post.Update reports a missing post", func(t *testing.T) {
+		repos := newRepositories(t)
 
-		err := repository.UpdatePost(
+		err := repos.Post.Update(
 			context.Background(),
 			post(alice, "Ghost", content.StatusDraft),
 		)
 		require.ErrorIs(t, err, content.ErrPostNotFound)
 	})
 
-	t.Run("DeletePost reports a missing post", func(t *testing.T) {
-		repository := newRepository(t)
+	t.Run("Post.Delete reports a missing post", func(t *testing.T) {
+		repos := newRepositories(t)
 
-		err := repository.DeletePost(context.Background(), uuid.NewV7().String())
+		err := repos.Post.Delete(context.Background(), uuid.NewV7().String())
 		require.ErrorIs(t, err, content.ErrPostNotFound)
 	})
 
 	t.Run("round-trips a draft", func(t *testing.T) {
-		repository := newRepository(t)
+		repos := newRepositories(t)
 
 		draft := post(alice, "First", content.StatusDraft)
 		draft.Body = "Hello, world."
-		require.NoError(t, repository.InsertPost(context.Background(), draft))
+		require.NoError(t, repos.Post.Insert(context.Background(), draft))
 
-		stored, err := repository.GetPost(context.Background(), draft.ID)
+		stored, err := repos.Post.Get(context.Background(), draft.ID)
 		require.NoError(t, err)
 
 		assert.Equal(t, draft.Title, stored.Title)
@@ -70,39 +74,39 @@ func Run(t *testing.T, newRepository New) {
 	})
 
 	t.Run("round-trips a published post with its timestamp", func(t *testing.T) {
-		repository := newRepository(t)
+		repos := newRepositories(t)
 
 		published := post(alice, "Live", content.StatusPublished)
 		at := time.Date(2026, 3, 1, 12, 0, 0, 0, time.UTC)
 		published.PublishedAt = &at
-		require.NoError(t, repository.InsertPost(context.Background(), published))
+		require.NoError(t, repos.Post.Insert(context.Background(), published))
 
-		stored, err := repository.GetPost(context.Background(), published.ID)
+		stored, err := repos.Post.Get(context.Background(), published.ID)
 		require.NoError(t, err)
 
 		require.NotNil(t, stored.PublishedAt)
 		assert.True(t, at.Equal(*stored.PublishedAt), "want %s, got %s", at, *stored.PublishedAt)
 	})
 
-	t.Run("UpdatePost leaves the author alone", func(t *testing.T) {
-		repository := newRepository(t)
+	t.Run("Post.Update leaves the author alone", func(t *testing.T) {
+		repos := newRepositories(t)
 
 		draft := post(alice, "First", content.StatusDraft)
-		require.NoError(t, repository.InsertPost(context.Background(), draft))
+		require.NoError(t, repos.Post.Insert(context.Background(), draft))
 
 		// Ownership is immutable, so a repository asked to move a post to another author must not.
 		draft.AuthorRef = bob
 		draft.Title = "Renamed"
-		require.NoError(t, repository.UpdatePost(context.Background(), draft))
+		require.NoError(t, repos.Post.Update(context.Background(), draft))
 
-		stored, err := repository.GetPost(context.Background(), draft.ID)
+		stored, err := repos.Post.Get(context.Background(), draft.ID)
 		require.NoError(t, err)
 		assert.Equal(t, "Renamed", stored.Title)
 		assert.Equal(t, alice, stored.AuthorRef)
 	})
 
-	t.Run("ListPosts filters and orders", func(t *testing.T) {
-		repository := newRepository(t)
+	t.Run("Post.List filters and orders", func(t *testing.T) {
+		repos := newRepositories(t)
 
 		base := time.Date(2026, 3, 1, 12, 0, 0, 0, time.UTC)
 
@@ -120,11 +124,11 @@ func Run(t *testing.T, newRepository New) {
 		newest.PublishedAt = &at
 
 		for _, p := range []*content.Post{first, second, newest} {
-			require.NoError(t, repository.InsertPost(context.Background(), p))
+			require.NoError(t, repos.Post.Insert(context.Background(), p))
 		}
 
 		t.Run("unfiltered, newest first with the id as tiebreak", func(t *testing.T) {
-			posts, err := repository.ListPosts(context.Background(), content.PostFilter{Limit: 10})
+			posts, err := repos.Post.List(context.Background(), content.PostFilter{Limit: 10})
 			require.NoError(t, err)
 			require.Len(t, posts, 3)
 			// "X" is 0x58 and "-" is 0x2D, so DESC byte order puts aaXbb before aa-bb.
@@ -133,7 +137,7 @@ func Run(t *testing.T, newRepository New) {
 		})
 
 		t.Run("by status", func(t *testing.T) {
-			posts, err := repository.ListPosts(context.Background(), content.PostFilter{
+			posts, err := repos.Post.List(context.Background(), content.PostFilter{
 				Status: content.StatusPublished,
 				Limit:  10,
 			})
@@ -143,7 +147,7 @@ func Run(t *testing.T, newRepository New) {
 		})
 
 		t.Run("by author", func(t *testing.T) {
-			posts, err := repository.ListPosts(context.Background(), content.PostFilter{
+			posts, err := repos.Post.List(context.Background(), content.PostFilter{
 				AuthorRef: alice,
 				Limit:     10,
 			})
@@ -152,7 +156,7 @@ func Run(t *testing.T, newRepository New) {
 		})
 
 		t.Run("by status and author together", func(t *testing.T) {
-			posts, err := repository.ListPosts(context.Background(), content.PostFilter{
+			posts, err := repos.Post.List(context.Background(), content.PostFilter{
 				Status:    content.StatusDraft,
 				AuthorRef: alice,
 				Limit:     10,
@@ -160,7 +164,7 @@ func Run(t *testing.T, newRepository New) {
 			require.NoError(t, err)
 			assert.Len(t, posts, 2)
 
-			posts, err = repository.ListPosts(context.Background(), content.PostFilter{
+			posts, err = repos.Post.List(context.Background(), content.PostFilter{
 				Status:    content.StatusPublished,
 				AuthorRef: alice,
 				Limit:     10,
@@ -170,14 +174,14 @@ func Run(t *testing.T, newRepository New) {
 		})
 
 		t.Run("honours the limit", func(t *testing.T) {
-			posts, err := repository.ListPosts(context.Background(), content.PostFilter{Limit: 1})
+			posts, err := repos.Post.List(context.Background(), content.PostFilter{Limit: 1})
 			require.NoError(t, err)
 			require.Len(t, posts, 1)
 			assert.Equal(t, newest.ID, posts[0].ID)
 		})
 
 		t.Run("matches nothing for an unknown author", func(t *testing.T) {
-			posts, err := repository.ListPosts(context.Background(), content.PostFilter{
+			posts, err := repos.Post.List(context.Background(), content.PostFilter{
 				AuthorRef: "urn:auth:user:nobody",
 				Limit:     10,
 			})
@@ -186,14 +190,14 @@ func Run(t *testing.T, newRepository New) {
 		})
 	})
 
-	t.Run("DeletePost removes it", func(t *testing.T) {
-		repository := newRepository(t)
+	t.Run("Post.Delete removes it", func(t *testing.T) {
+		repos := newRepositories(t)
 
 		draft := post(alice, "Doomed", content.StatusDraft)
-		require.NoError(t, repository.InsertPost(context.Background(), draft))
-		require.NoError(t, repository.DeletePost(context.Background(), draft.ID))
+		require.NoError(t, repos.Post.Insert(context.Background(), draft))
+		require.NoError(t, repos.Post.Delete(context.Background(), draft.ID))
 
-		_, err := repository.GetPost(context.Background(), draft.ID)
+		_, err := repos.Post.Get(context.Background(), draft.ID)
 		require.ErrorIs(t, err, content.ErrPostNotFound)
 	})
 }

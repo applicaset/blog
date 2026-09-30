@@ -38,8 +38,18 @@ func postColumns() []string {
 	}
 }
 
-func (r *Repository) InsertPost(ctx context.Context, post *content.Post) error {
-	_, err := r.builder().
+type PostRepository struct {
+	db *sql.DB
+}
+
+var _ content.PostRepository = (*PostRepository)(nil)
+
+func NewPostRepository(db *sql.DB) *PostRepository {
+	return &PostRepository{db: db}
+}
+
+func (r *PostRepository) Insert(ctx context.Context, post *content.Post) error {
+	_, err := builder(r.db).
 		Insert(tablePosts).
 		Columns(postColumns()...).
 		Values(
@@ -61,9 +71,9 @@ func (r *Repository) InsertPost(ctx context.Context, post *content.Post) error {
 	return nil
 }
 
-// UpdatePost never changes author_ref: ownership is immutable.
-func (r *Repository) UpdatePost(ctx context.Context, post *content.Post) error {
-	result, err := r.builder().
+// Update never changes author_ref: ownership is immutable.
+func (r *PostRepository) Update(ctx context.Context, post *content.Post) error {
+	result, err := builder(r.db).
 		Update(tablePosts).
 		Set(postColumnTitle, post.Title).
 		Set(postColumnBody, post.Body).
@@ -80,8 +90,8 @@ func (r *Repository) UpdatePost(ctx context.Context, post *content.Post) error {
 	return requireOneRow(result, fmt.Errorf("%w: %s", content.ErrPostNotFound, post.ID))
 }
 
-func (r *Repository) DeletePost(ctx context.Context, id string) error {
-	result, err := r.builder().
+func (r *PostRepository) Delete(ctx context.Context, id string) error {
+	result, err := builder(r.db).
 		Delete(tablePosts).
 		Where(squirrel.Eq{postColumnID: id}).
 		ExecContext(ctx)
@@ -92,8 +102,8 @@ func (r *Repository) DeletePost(ctx context.Context, id string) error {
 	return requireOneRow(result, fmt.Errorf("%w: %s", content.ErrPostNotFound, id))
 }
 
-func (r *Repository) GetPost(ctx context.Context, id string) (*content.Post, error) {
-	row := r.builder().
+func (r *PostRepository) Get(ctx context.Context, id string) (*content.Post, error) {
+	row := builder(r.db).
 		Select(postColumns()...).
 		From(tablePosts).
 		Where(squirrel.Eq{postColumnID: id}).
@@ -102,11 +112,11 @@ func (r *Repository) GetPost(ctx context.Context, id string) (*content.Post, err
 	return scanPost(row, fmt.Errorf("%w: %s", content.ErrPostNotFound, id))
 }
 
-func (r *Repository) ListPosts(
+func (r *PostRepository) List(
 	ctx context.Context,
 	filter content.PostFilter,
 ) ([]content.Post, error) {
-	query := r.builder().
+	query := builder(r.db).
 		Select(postColumns()...).
 		From(tablePosts)
 

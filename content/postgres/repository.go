@@ -1,5 +1,5 @@
-// Package postgres stores content's posts in Postgres. It owns its schema and migrates itself, so
-// wiring content to a different backend runs none of this.
+// Package postgres stores content's posts in Postgres. It owns its schema, applied by
+// Migrate, so wiring content to a different backend runs none of this.
 package postgres
 
 import (
@@ -9,18 +9,13 @@ import (
 	"fmt"
 
 	"github.com/Masterminds/squirrel"
-	"github.com/applicaset/buildset/blog/content"
 	"github.com/applicaset/buildset/pkg/sqlmigrate"
 )
 
 //go:embed migrations/*.sql
 var migrations embed.FS
 
-type Repository struct {
-	db *sql.DB
-}
-
-func NewRepository(ctx context.Context, db *sql.DB) (*Repository, error) {
+func Migrate(ctx context.Context, db *sql.DB) error {
 	runner := sqlmigrate.Runner{
 		FileSystem: migrations,
 		Directory:  "migrations",
@@ -29,16 +24,16 @@ func NewRepository(ctx context.Context, db *sql.DB) (*Repository, error) {
 	}
 
 	if err := runner.Up(ctx, db); err != nil {
-		return nil, fmt.Errorf("migrate content schema: %w", err)
+		return fmt.Errorf("migrate content schema: %w", err)
 	}
 
-	return &Repository{db: db}, nil
+	return nil
 }
 
 // The only place this package names a placeholder style. squirrel numbers the $n placeholders, so
 // the filtered listing does not have to.
-func (r *Repository) builder() squirrel.StatementBuilderType {
-	return squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar).RunWith(r.db)
+func builder(db *sql.DB) squirrel.StatementBuilderType {
+	return squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar).RunWith(db)
 }
 
 type rowScanner interface {
@@ -57,5 +52,3 @@ func requireOneRow(result sql.Result, notFound error) error {
 
 	return nil
 }
-
-var _ content.Repository = (*Repository)(nil)

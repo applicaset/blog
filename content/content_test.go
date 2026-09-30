@@ -26,10 +26,9 @@ func newService(t *testing.T) *content.Service {
 	db.SetMaxOpenConns(1)
 	t.Cleanup(func() { _ = db.Close() })
 
-	repository, err := contentsqlite.NewRepository(t.Context(), db)
-	require.NoError(t, err)
+	require.NoError(t, contentsqlite.Migrate(t.Context(), db))
 
-	return content.NewService(repository)
+	return content.NewService(contentsqlite.NewPostRepository(db))
 }
 
 func createPost(t *testing.T, service *content.Service, authorRef, title string) *content.Post {

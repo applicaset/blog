@@ -1,5 +1,5 @@
-// Package sqlite stores content's posts in SQLite. It owns its schema and migrates itself, so
-// wiring content to a different backend runs none of this.
+// Package sqlite stores content's posts in SQLite. It owns its schema, applied by
+// Migrate, so wiring content to a different backend runs none of this.
 package sqlite
 
 import (
@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/Masterminds/squirrel"
-	"github.com/applicaset/buildset/blog/content"
 	"github.com/applicaset/buildset/pkg/sqlmigrate"
 )
 
@@ -19,11 +18,7 @@ var migrations embed.FS
 
 const timeFormat = "2006-01-02T15:04:05.000Z"
 
-type Repository struct {
-	db *sql.DB
-}
-
-func NewRepository(ctx context.Context, db *sql.DB) (*Repository, error) {
+func Migrate(ctx context.Context, db *sql.DB) error {
 	runner := sqlmigrate.Runner{
 		FileSystem: migrations,
 		Directory:  "migrations",
@@ -31,15 +26,15 @@ func NewRepository(ctx context.Context, db *sql.DB) (*Repository, error) {
 	}
 
 	if err := runner.Up(ctx, db); err != nil {
-		return nil, fmt.Errorf("migrate content schema: %w", err)
+		return fmt.Errorf("migrate content schema: %w", err)
 	}
 
-	return &Repository{db: db}, nil
+	return nil
 }
 
 // SQLite takes ? placeholders, squirrel's default, so this is the only place the dialect is named.
-func (r *Repository) builder() squirrel.StatementBuilderType {
-	return squirrel.StatementBuilder.RunWith(r.db)
+func builder(db *sql.DB) squirrel.StatementBuilderType {
+	return squirrel.StatementBuilder.RunWith(db)
 }
 
 type rowScanner interface {
@@ -74,5 +69,3 @@ func formatOptionalTime(t *time.Time) any {
 func parseTime(value string) (time.Time, error) {
 	return time.Parse(timeFormat, value)
 }
-
-var _ content.Repository = (*Repository)(nil)

@@ -7,17 +7,16 @@ import (
 	"log/slog"
 
 	"github.com/applicaset/buildset/auth"
+	authbackend "github.com/applicaset/buildset/auth/backend"
 	"github.com/applicaset/buildset/auth/kit"
-	authpostgres "github.com/applicaset/buildset/auth/postgres"
-	authsqlite "github.com/applicaset/buildset/auth/sqlite"
 	authui "github.com/applicaset/buildset/auth/ui"
 	"github.com/applicaset/buildset/authz"
-	authzpostgres "github.com/applicaset/buildset/authz/postgres"
-	authzsqlite "github.com/applicaset/buildset/authz/sqlite"
+	authzbackend "github.com/applicaset/buildset/authz/backend"
 	"github.com/applicaset/buildset/blog/content"
 	contentpostgres "github.com/applicaset/buildset/blog/content/postgres"
 	contentsqlite "github.com/applicaset/buildset/blog/content/sqlite"
 	"github.com/applicaset/buildset/blog/web"
+	"github.com/applicaset/buildset/pkg/storage"
 )
 
 // administratorRole is the application's vocabulary; authz only stores the string.
@@ -38,17 +37,21 @@ func newServices(
 	stores *Stores,
 	logger *slog.Logger,
 ) (*services, error) {
-	authRepository, err := newAuthRepository(ctx, cfg.Database.Driver, stores.Auth)
+	authRepos, err := authbackend.New(ctx, cfg.Database.Driver, &storage.Handle{SQL: stores.Auth})
 	if err != nil {
-		return nil, fmt.Errorf("build auth repository: %w", err)
+		return nil, fmt.Errorf("build auth repositories: %w", err)
 	}
 
-	authzRepository, err := newAuthzRepository(ctx, cfg.Database.Driver, stores.Authz)
+	authzRepos, err := authzbackend.New(
+		ctx,
+		cfg.Database.Driver,
+		&storage.Handle{SQL: stores.Authz},
+	)
 	if err != nil {
-		return nil, fmt.Errorf("build authz repository: %w", err)
+		return nil, fmt.Errorf("build authz repositories: %w", err)
 	}
 
-	authzService := authz.NewService(authzRepository)
+	authzService := authz.NewService(authzRepos.Role, authzRepos.SubjectRole, authzRepos.Grant)
 
 	// The hook lets auth create the first administrator without knowing that authz exists.
 	firstUserHook := auth.FirstUserHookFunc(func(ctx context.Context, userRef string) error {
@@ -74,7 +77,10 @@ func newServices(
 
 	authService, authPages, err := kit.Build(kit.Options{
 		Config:        cfg.Auth,
-		Repository:    authRepository,
+		UserRepo:      authRepos.User,
+		SessionRepo:   authRepos.Session,
+		TokenRepo:     authRepos.Token,
+		IdentityRepo:  authRepos.Identity,
 		FirstUserHook: firstUserHook,
 		Registration:  registrationPolicy,
 		Cookie: authui.Config{
@@ -88,7 +94,7 @@ func newServices(
 		return nil, err
 	}
 
-	contentRepository, err := newContentRepository(ctx, cfg.Database.Driver, stores.Content)
+	postRepo, err := newPostRepository(ctx, cfg.Database.Driver, stores.Content)
 	if err != nil {
 		return nil, fmt.Errorf("build content repository: %w", err)
 	}
@@ -97,36 +103,28 @@ func newServices(
 		auth:      authService,
 		authPages: authPages,
 		authz:     authzService,
-		content:   content.NewService(contentRepository),
+		content:   content.NewService(postRepo),
 	}, nil
 }
 
-// The factories below are the only places that name a storage backend.
+// The factory below is the only place that names a storage backend.
 
-func newAuthRepository(ctx context.Context, driver string, db *sql.DB) (auth.Repository, error) {
-	if driver == DriverPostgres {
-		return authpostgres.NewRepository(ctx, db)
-	}
-
-	return authsqlite.NewRepository(ctx, db)
-}
-
-func newAuthzRepository(ctx context.Context, driver string, db *sql.DB) (authz.Repository, error) {
-	if driver == DriverPostgres {
-		return authzpostgres.NewRepository(ctx, db)
-	}
-
-	return authzsqlite.NewRepository(ctx, db)
-}
-
-func newContentRepository(
+func newPostRepository(
 	ctx context.Context,
 	driver string,
 	db *sql.DB,
-) (content.Repository, error) {
+) (content.PostRepository, error) {
 	if driver == DriverPostgres {
-		return contentpostgres.NewRepository(ctx, db)
+		if err := contentpostgres.Migrate(ctx, db); err != nil {
+			return nil, err
+		}
+
+		return contentpostgres.NewPostRepository(db), nil
 	}
 
-	return contentsqlite.NewRepository(ctx, db)
+	if err := contentsqlite.Migrate(ctx, db); err != nil {
+		return nil, err
+	}
+
+	return contentsqlite.NewPostRepository(db), nil
 }

@@ -66,14 +66,14 @@ func New(ctx context.Context, cfg *Config, logger *slog.Logger) (*Service, error
 		return nil, fmt.Errorf("open database: %w", err)
 	}
 
-	repository, err := newRepository(ctx, cfg.Database.Driver, db)
+	postRepo, err := newPostRepository(ctx, cfg.Database.Driver, db)
 	if err != nil {
 		_ = db.Close()
 
 		return nil, fmt.Errorf("build content repository: %w", err)
 	}
 
-	handler, err := httpapi.NewHandler(content.NewService(repository), logger)
+	handler, err := httpapi.NewHandler(content.NewService(postRepo), logger)
 	if err != nil {
 		_ = db.Close()
 
@@ -86,18 +86,18 @@ func New(ctx context.Context, cfg *Config, logger *slog.Logger) (*Service, error
 	return &Service{db: db, routes: mux}, nil
 }
 
-func (s *Service) Routes() http.Handler { return s.routes }
+func (svc *Service) Routes() http.Handler { return svc.routes }
 
-func (s *Service) Ping(ctx context.Context) error {
-	if err := s.db.PingContext(ctx); err != nil {
+func (svc *Service) Ping(ctx context.Context) error {
+	if err := svc.db.PingContext(ctx); err != nil {
 		return fmt.Errorf("ping database: %w", err)
 	}
 
 	return nil
 }
 
-func (s *Service) Close() error {
-	if err := s.db.Close(); err != nil {
+func (svc *Service) Close() error {
+	if err := svc.db.Close(); err != nil {
 		return fmt.Errorf("close database: %w", err)
 	}
 
@@ -137,10 +137,22 @@ func Run(ctx context.Context) error {
 	})
 }
 
-func newRepository(ctx context.Context, driver string, db *sql.DB) (content.Repository, error) {
+func newPostRepository(
+	ctx context.Context,
+	driver string,
+	db *sql.DB,
+) (content.PostRepository, error) {
 	if driver == storage.DriverPostgres {
-		return contentpostgres.NewRepository(ctx, db)
+		if err := contentpostgres.Migrate(ctx, db); err != nil {
+			return nil, err
+		}
+
+		return contentpostgres.NewPostRepository(db), nil
 	}
 
-	return contentsqlite.NewRepository(ctx, db)
+	if err := contentsqlite.Migrate(ctx, db); err != nil {
+		return nil, err
+	}
+
+	return contentsqlite.NewPostRepository(db), nil
 }
