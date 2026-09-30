@@ -3,8 +3,8 @@ package httpapi
 import (
 	"errors"
 
-	"github.com/buildset/buildset/blog/content"
-	"github.com/buildset/buildset/pkg/httpx"
+	"github.com/applicaset/buildset/blog/content"
+	"github.com/applicaset/buildset/pkg/httpx"
 )
 
 // Classify maps content's errors to a wire code and a sentence for the visitor. The in-process

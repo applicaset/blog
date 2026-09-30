@@ -8,7 +8,7 @@ import (
 	"time"
 	"uuid"
 
-	"github.com/buildset/buildset/blog/content"
+	"github.com/applicaset/buildset/blog/content"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

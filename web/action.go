@@ -3,8 +3,8 @@ package web
 import (
 	"fmt"
 
-	"github.com/buildset/buildset/pkg/action"
-	"github.com/buildset/buildset/pkg/ref"
+	"github.com/applicaset/buildset/pkg/action"
+	"github.com/applicaset/buildset/pkg/ref"
 )
 
 // The actions this site asks about. The authorization service stores these strings and attaches no

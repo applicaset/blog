@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/Masterminds/squirrel"
-	"github.com/buildset/buildset/blog/content"
-	"github.com/buildset/buildset/pkg/sqlmigrate"
+	"github.com/applicaset/buildset/blog/content"
+	"github.com/applicaset/buildset/pkg/sqlmigrate"
 )
 
 //go:embed migrations/*.sql

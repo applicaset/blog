@@ -1,6 +1,6 @@
 package web
 
-import "github.com/buildset/buildset/pkg/httpx"
+import "github.com/applicaset/buildset/pkg/httpx"
 
 // Error is what a dependency returns when the request, not the system, is at fault. Kind is one of
 // the sentinels above so errors.Is keeps working; Message is written for the visitor.

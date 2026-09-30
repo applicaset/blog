@@ -8,9 +8,9 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/buildset/buildset/blog/content"
-	"github.com/buildset/buildset/pkg/api/contentapi"
-	"github.com/buildset/buildset/pkg/httpx"
+	"github.com/applicaset/buildset/blog/content"
+	"github.com/applicaset/buildset/pkg/api/contentapi"
+	"github.com/applicaset/buildset/pkg/httpx"
 )
 
 var errMissingDependency = errors.New("missing dependency")

@@ -5,8 +5,8 @@ package client
 import (
 	"context"
 
-	"github.com/buildset/buildset/pkg/api/contentapi"
-	"github.com/buildset/buildset/pkg/httpx"
+	"github.com/applicaset/buildset/pkg/api/contentapi"
+	"github.com/applicaset/buildset/pkg/httpx"
 )
 
 type Client struct {

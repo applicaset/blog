@@ -1,12 +1,12 @@
-module github.com/buildset/buildset/blog
+module github.com/applicaset/buildset/blog
 
 go 1.27.1
 
 require (
 	github.com/Masterminds/squirrel v1.5.4
-	github.com/buildset/buildset/auth v0.0.0
-	github.com/buildset/buildset/authz v0.0.0
-	github.com/buildset/buildset/pkg v0.0.0
+	github.com/applicaset/buildset/auth v0.0.0
+	github.com/applicaset/buildset/authz v0.0.0
+	github.com/applicaset/buildset/pkg v0.0.0
 	github.com/nasermirzaei89/env v1.8.0
 	github.com/playwright-community/playwright-go v0.6000.0
 	github.com/stretchr/testify v1.12.1
@@ -294,8 +294,8 @@ tool (
 	golang.org/x/vuln/cmd/govulncheck
 )
 
-replace github.com/buildset/buildset/pkg => ../pkg
+replace github.com/applicaset/buildset/pkg => ../pkg
 
-replace github.com/buildset/buildset/authz => ../authz
+replace github.com/applicaset/buildset/authz => ../authz
 
-replace github.com/buildset/buildset/auth => ../auth
+replace github.com/applicaset/buildset/auth => ../auth

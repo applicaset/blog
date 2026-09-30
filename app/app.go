@@ -6,10 +6,10 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/buildset/buildset/auth/kit"
-	authui "github.com/buildset/buildset/auth/ui"
-	"github.com/buildset/buildset/pkg/config"
-	"github.com/buildset/buildset/pkg/serve"
+	"github.com/applicaset/buildset/auth/kit"
+	authui "github.com/applicaset/buildset/auth/ui"
+	"github.com/applicaset/buildset/pkg/config"
+	"github.com/applicaset/buildset/pkg/serve"
 )
 
 // Application is the whole system assembled: configuration, storage, services, and one HTTP

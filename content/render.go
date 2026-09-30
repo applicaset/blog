@@ -3,7 +3,7 @@ package content
 import (
 	"html/template"
 
-	"github.com/buildset/buildset/blog/content/render"
+	"github.com/applicaset/buildset/blog/content/render"
 )
 
 // The rules live in content/render so a consumer holding only a body and a content type, such as a

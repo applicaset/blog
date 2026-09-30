@@ -6,7 +6,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/buildset/buildset/pkg/storage"
+	"github.com/applicaset/buildset/pkg/storage"
 )
 
 // Stores holds one handle per service. Under SQLite they share one file. Under Postgres each gets

@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/buildset/buildset/blog/web"
+	"github.com/applicaset/buildset/blog/web"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

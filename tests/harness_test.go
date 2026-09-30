@@ -13,9 +13,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/buildset/buildset/auth/kit"
-	"github.com/buildset/buildset/blog/app"
-	"github.com/buildset/buildset/pkg/mail"
+	"github.com/applicaset/buildset/auth/kit"
+	"github.com/applicaset/buildset/blog/app"
+	"github.com/applicaset/buildset/pkg/mail"
 	"github.com/nasermirzaei89/env"
 	"github.com/playwright-community/playwright-go"
 	"github.com/stretchr/testify/require"
