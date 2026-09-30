@@ -2,6 +2,12 @@ NPM_CMD?=npm
 
 GO_CMD?=go
 
+GOOS?=$(shell $(GO_CMD) env GOOS)
+GOARCH?=$(shell $(GO_CMD) env GOARCH)
+CGO_ENABLED?=0
+BIN_EXT=$(if $(filter windows,$(GOOS)),.exe)
+BIN_SUFFIX=_$(GOOS)_$(GOARCH)$(BIN_EXT)
+
 GOLANGCI_LINT_CMD?=$(GO_CMD) tool golangci-lint
 
 GOVULNCHECK_CMD?=$(GO_CMD) tool govulncheck
@@ -15,12 +21,17 @@ help: ## Show help
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 .PHONY: build
-build: npm-build ## Build bin/blog, bin/content and bin/web
-	$(GO_CMD) build -o bin/ ./cmd/...
+build: npm-build go-build ## Build the assets and every command
+
+.PHONY: go-build
+go-build: ## Build every command into bin/<name>_<os>_<arch>
+	@set -e; for c in $$(ls cmd); do \
+		CGO_ENABLED=$(CGO_ENABLED) GOOS=$(GOOS) GOARCH=$(GOARCH) $(GO_CMD) build -trimpath -ldflags="-s -w" -o bin/$${c}$(BIN_SUFFIX) ./cmd/$$c; \
+	done
 
 .PHONY: run
-run: build ## Build and start bin/blog
-	cd .. && blog/bin/blog
+run: build ## Build and start blog
+	cd .. && blog/bin/blog$(BIN_SUFFIX)
 
 .PHONY: format
 format: ## Format the code and tidy go.mod
