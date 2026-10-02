@@ -1,8 +1,8 @@
 package main
 
 import (
-	webapp "github.com/applicaset/buildset/blog/web/app"
-	"github.com/applicaset/buildset/pkg/serve"
+	webapp "github.com/applicaset/blog/web/app"
+	"github.com/applicaset/pkg/serve"
 )
 
 func main() { serve.Main(webapp.Run) }

@@ -4,16 +4,16 @@ import (
 	"context"
 	"html/template"
 
-	"github.com/applicaset/buildset/auth"
-	authhttpapi "github.com/applicaset/buildset/auth/httpapi"
-	authui "github.com/applicaset/buildset/auth/ui"
-	"github.com/applicaset/buildset/authz"
-	authzhttpapi "github.com/applicaset/buildset/authz/httpapi"
-	"github.com/applicaset/buildset/blog/content"
-	contenthttpapi "github.com/applicaset/buildset/blog/content/httpapi"
-	"github.com/applicaset/buildset/blog/web"
-	"github.com/applicaset/buildset/pkg/httpx"
-	"github.com/applicaset/buildset/pkg/ref"
+	"github.com/applicaset/auth"
+	authhttpapi "github.com/applicaset/auth/httpapi"
+	authui "github.com/applicaset/auth/ui"
+	"github.com/applicaset/authz"
+	authzhttpapi "github.com/applicaset/authz/httpapi"
+	"github.com/applicaset/blog/content"
+	contenthttpapi "github.com/applicaset/blog/content/httpapi"
+	"github.com/applicaset/blog/web"
+	"github.com/applicaset/pkg/httpx"
+	"github.com/applicaset/pkg/ref"
 )
 
 // Each adapter below calls a service layer in process. web/remote satisfies the same interfaces

@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"slices"
 
-	"github.com/applicaset/buildset/blog/content/render"
+	"github.com/applicaset/blog/content/render"
 )
 
 const (

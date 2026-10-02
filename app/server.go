@@ -5,7 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/applicaset/buildset/blog/web"
+	"github.com/applicaset/blog/web"
 )
 
 // Routes mounts every service handler. pkg/serve adds health probes and middleware, so this binary

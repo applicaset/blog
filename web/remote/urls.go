@@ -1,6 +1,6 @@
 package remote
 
-import "github.com/applicaset/buildset/pkg/safeurl"
+import "github.com/applicaset/pkg/safeurl"
 
 // URLs are the identity service's pages. They are configuration, not calls, so rendering never
 // waits on a round trip. They stay relative because the gateway serves both services on one

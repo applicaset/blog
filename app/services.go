@@ -6,17 +6,17 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/applicaset/buildset/auth"
-	authbackend "github.com/applicaset/buildset/auth/backend"
-	"github.com/applicaset/buildset/auth/kit"
-	authui "github.com/applicaset/buildset/auth/ui"
-	"github.com/applicaset/buildset/authz"
-	authzbackend "github.com/applicaset/buildset/authz/backend"
-	"github.com/applicaset/buildset/blog/content"
-	contentpostgres "github.com/applicaset/buildset/blog/content/postgres"
-	contentsqlite "github.com/applicaset/buildset/blog/content/sqlite"
-	"github.com/applicaset/buildset/blog/web"
-	"github.com/applicaset/buildset/pkg/storage"
+	"github.com/applicaset/auth"
+	authbackend "github.com/applicaset/auth/backend"
+	"github.com/applicaset/auth/kit"
+	authui "github.com/applicaset/auth/ui"
+	"github.com/applicaset/authz"
+	authzbackend "github.com/applicaset/authz/backend"
+	"github.com/applicaset/blog/content"
+	contentpostgres "github.com/applicaset/blog/content/postgres"
+	contentsqlite "github.com/applicaset/blog/content/sqlite"
+	"github.com/applicaset/blog/web"
+	"github.com/applicaset/pkg/storage"
 )
 
 // administratorRole is the application's vocabulary; authz only stores the string.

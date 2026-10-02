@@ -3,8 +3,8 @@ package remote
 import (
 	"context"
 
-	authzclient "github.com/applicaset/buildset/authz/client"
-	"github.com/applicaset/buildset/blog/web"
+	authzclient "github.com/applicaset/authz/client"
+	"github.com/applicaset/blog/web"
 )
 
 // Authz satisfies web.Authz by calling the authorization service.

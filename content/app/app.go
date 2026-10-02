@@ -9,13 +9,13 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/applicaset/buildset/blog/content"
-	"github.com/applicaset/buildset/blog/content/httpapi"
-	contentpostgres "github.com/applicaset/buildset/blog/content/postgres"
-	contentsqlite "github.com/applicaset/buildset/blog/content/sqlite"
-	"github.com/applicaset/buildset/pkg/config"
-	"github.com/applicaset/buildset/pkg/serve"
-	"github.com/applicaset/buildset/pkg/storage"
+	"github.com/applicaset/blog/content"
+	"github.com/applicaset/blog/content/httpapi"
+	contentpostgres "github.com/applicaset/blog/content/postgres"
+	contentsqlite "github.com/applicaset/blog/content/sqlite"
+	"github.com/applicaset/pkg/config"
+	"github.com/applicaset/pkg/serve"
+	"github.com/applicaset/pkg/storage"
 )
 
 // schema is the Postgres schema this service owns. SQLite ignores it.

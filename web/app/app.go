@@ -11,14 +11,14 @@ import (
 	"net/http"
 	"time"
 
-	authclient "github.com/applicaset/buildset/auth/client"
-	authzclient "github.com/applicaset/buildset/authz/client"
-	contentclient "github.com/applicaset/buildset/blog/content/client"
-	"github.com/applicaset/buildset/blog/web"
-	"github.com/applicaset/buildset/blog/web/remote"
-	"github.com/applicaset/buildset/pkg/config"
-	"github.com/applicaset/buildset/pkg/httpx"
-	"github.com/applicaset/buildset/pkg/serve"
+	authclient "github.com/applicaset/auth/client"
+	authzclient "github.com/applicaset/authz/client"
+	contentclient "github.com/applicaset/blog/content/client"
+	"github.com/applicaset/blog/web"
+	"github.com/applicaset/blog/web/remote"
+	"github.com/applicaset/pkg/config"
+	"github.com/applicaset/pkg/httpx"
+	"github.com/applicaset/pkg/serve"
 	"github.com/nasermirzaei89/env"
 )
 

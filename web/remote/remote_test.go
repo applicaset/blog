@@ -6,10 +6,10 @@ import (
 	"testing"
 	"time"
 
-	authclient "github.com/applicaset/buildset/auth/client"
-	"github.com/applicaset/buildset/blog/web"
-	"github.com/applicaset/buildset/blog/web/remote"
-	"github.com/applicaset/buildset/pkg/httpx"
+	authclient "github.com/applicaset/auth/client"
+	"github.com/applicaset/blog/web"
+	"github.com/applicaset/blog/web/remote"
+	"github.com/applicaset/pkg/httpx"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

@@ -4,10 +4,10 @@ import (
 	"context"
 	"log/slog"
 
-	"github.com/applicaset/buildset/auth"
-	"github.com/applicaset/buildset/auth/kit"
-	"github.com/applicaset/buildset/pkg/config"
-	"github.com/applicaset/buildset/pkg/storage"
+	"github.com/applicaset/auth"
+	"github.com/applicaset/auth/kit"
+	"github.com/applicaset/pkg/config"
+	"github.com/applicaset/pkg/storage"
 	"github.com/nasermirzaei89/env"
 )
 

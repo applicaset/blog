@@ -3,9 +3,9 @@ package remote
 import (
 	"context"
 
-	authclient "github.com/applicaset/buildset/auth/client"
-	"github.com/applicaset/buildset/blog/web"
-	"github.com/applicaset/buildset/pkg/api/authapi"
+	authclient "github.com/applicaset/auth/client"
+	"github.com/applicaset/blog/web"
+	"github.com/applicaset/pkg/api/authapi"
 )
 
 // Auth satisfies web.Auth by calling the identity service.

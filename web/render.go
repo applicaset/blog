@@ -10,8 +10,8 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/applicaset/buildset/pkg/asset"
-	"github.com/applicaset/buildset/pkg/initials"
+	"github.com/applicaset/pkg/asset"
+	"github.com/applicaset/pkg/initials"
 )
 
 //go:embed templates/*.gohtml templates/icons/*.svg
