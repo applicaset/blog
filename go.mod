@@ -4,9 +4,9 @@ go 1.27.1
 
 require (
 	github.com/Masterminds/squirrel v1.5.4
-	github.com/applicaset/auth v0.0.0
-	github.com/applicaset/authz v0.0.0
-	github.com/applicaset/pkg v0.0.0
+	github.com/applicaset/auth v0.0.0-20261002001217-11026f3e143f
+	github.com/applicaset/authz v0.0.0-20261002001103-633493ea004c
+	github.com/applicaset/pkg v0.0.0-20261002000949-90941847c511
 	github.com/nasermirzaei89/env v1.8.0
 	github.com/playwright-community/playwright-go v0.6000.0
 	github.com/stretchr/testify v1.12.1
@@ -293,9 +293,3 @@ tool (
 	github.com/golangci/golangci-lint/v2/cmd/golangci-lint
 	golang.org/x/vuln/cmd/govulncheck
 )
-
-replace github.com/applicaset/pkg => ../pkg
-
-replace github.com/applicaset/authz => ../authz
-
-replace github.com/applicaset/auth => ../auth
