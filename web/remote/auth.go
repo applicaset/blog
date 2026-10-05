@@ -86,5 +86,6 @@ func toWebUser(user authapi.User) *web.User {
 		ID:       user.ID,
 		Username: user.Username,
 		Name:     user.Name,
+		Groups:   user.Groups,
 	}
 }

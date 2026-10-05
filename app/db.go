@@ -15,6 +15,7 @@ type Stores struct {
 	Auth    *sql.DB
 	Authz   *sql.DB
 	Content *sql.DB
+	Discuss *sql.DB
 
 	closers []*sql.DB
 }
@@ -27,8 +28,14 @@ func OpenStores(ctx context.Context, cfg DatabaseConfig) (*Stores, error) {
 			return nil, err
 		}
 
-		// One file for all three. Only convention keeps the services apart; the database does not.
-		return &Stores{Auth: db, Authz: db, Content: db, closers: []*sql.DB{db}}, nil
+		// One file for all of them. Only convention keeps the services apart; the database does not.
+		return &Stores{
+			Auth:    db,
+			Authz:   db,
+			Content: db,
+			Discuss: db,
+			closers: []*sql.DB{db},
+		}, nil
 	}
 
 	stores := &Stores{}
@@ -40,6 +47,7 @@ func OpenStores(ctx context.Context, cfg DatabaseConfig) (*Stores, error) {
 		{"auth", &stores.Auth},
 		{"authz", &stores.Authz},
 		{"content", &stores.Content},
+		{"discuss", &stores.Discuss},
 	} {
 		db, err := storage.Open(ctx, cfg, target.schema)
 		if err != nil {

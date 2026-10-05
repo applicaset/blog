@@ -16,6 +16,7 @@ import (
 	contentclient "github.com/applicaset/blog/content/client"
 	"github.com/applicaset/blog/web"
 	"github.com/applicaset/blog/web/remote"
+	discussclient "github.com/applicaset/discuss/client"
 	"github.com/applicaset/pkg/config"
 	"github.com/applicaset/pkg/httpx"
 	"github.com/applicaset/pkg/serve"
@@ -36,6 +37,7 @@ type Config struct {
 	AuthURL     string
 	AuthzURL    string
 	ContentURL  string
+	DiscussURL  string
 	HTTPTimeout time.Duration
 
 	// The identity service's pages, relative because the gateway puts both services on one origin.
@@ -68,6 +70,7 @@ func LoadConfig(ctx context.Context) (*Config, error) {
 	urls["AUTH_URL"] = &cfg.AuthURL
 	urls["AUTHZ_URL"] = &cfg.AuthzURL
 	urls["CONTENT_URL"] = &cfg.ContentURL
+	urls["DISCUSS_URL"] = &cfg.DiscussURL
 
 	for key, target := range urls {
 		value, err := config.LoadURL(key)
@@ -136,10 +139,16 @@ func New(cfg *Config, logger *slog.Logger) (*Site, error) {
 		return nil, fmt.Errorf("build content client: %w", err)
 	}
 
+	discussRemote, err := discussclient.New(cfg.DiscussURL, options)
+	if err != nil {
+		return nil, fmt.Errorf("build discuss client: %w", err)
+	}
+
 	site, err := web.New(web.Dependencies{
 		Auth:    remote.NewAuth(authRemote, cfg.URLs),
 		Authz:   remote.NewAuthz(authzRemote),
 		Content: remote.NewContent(contentRemote),
+		Discuss: remote.NewDiscuss(discussRemote),
 	}, web.Config{
 		SessionCookieName: cfg.Cookie.Name,
 		SecureCookies:     cfg.Cookie.Secure,

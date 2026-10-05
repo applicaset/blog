@@ -19,6 +19,9 @@ type User struct {
 	ID       string
 	Username string
 	Name     string
+	// Groups are what authorization checks the user against besides their own ref. Only a
+	// resolved session carries them; a user looked up by ref has none.
+	Groups []string
 }
 
 type Post struct {
@@ -32,6 +35,21 @@ type Post struct {
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 	PublishedAt *time.Time
+}
+
+// Comment is one entry of a post's thread. A deleted comment keeps its place with an empty body,
+// so its replies keep their parent.
+type Comment struct {
+	ID string
+	// ParentID is empty for a comment that replies to no other.
+	ParentID  string
+	AuthorRef string
+	Body      string
+	// Revision is what an edit must name, so a change over a stale copy is refused.
+	Revision  int
+	CreatedAt time.Time
+	EditedAt  *time.Time
+	DeletedAt *time.Time
 }
 
 const contentTypePlainText = "text/plain"
@@ -50,6 +68,7 @@ var (
 	ErrNotFound     = errors.New("not found")
 	ErrInvalidInput = errors.New("invalid input")
 	ErrConflict     = errors.New("conflict")
+	ErrForbidden    = errors.New("forbidden")
 )
 
 type Auth interface {
@@ -75,7 +94,8 @@ type Auth interface {
 }
 
 type Authz interface {
-	Can(ctx context.Context, subject, action, resource string) (bool, error)
+	// Can also allows what any of groups may do.
+	Can(ctx context.Context, subject string, groups []string, action, resource string) (bool, error)
 	Grant(ctx context.Context, subject string, actions []string, resource string) error
 	AssignRole(ctx context.Context, subject, role string) error
 	RevokeRole(ctx context.Context, subject, role string) error
@@ -93,4 +113,21 @@ type Content interface {
 	SetStatus(ctx context.Context, id, status string) (*Post, error)
 	DeletePost(ctx context.Context, id string) error
 	RenderBody(ctx context.Context, post *Post) (template.HTML, error)
+}
+
+// Discuss keeps the threads. It decides only who may change a comment: its author, reported as
+// ErrForbidden. Who may read and write on a post is this site's question.
+type Discuss interface {
+	// ListComments returns the whole thread, oldest first.
+	ListComments(ctx context.Context, resourceRef string) ([]Comment, error)
+	// AddComment replies to parentID when it is set.
+	AddComment(ctx context.Context, actorRef, resourceRef, parentID, body string) (*Comment, error)
+	EditComment(
+		ctx context.Context,
+		actorRef, resourceRef, commentID string,
+		revision int,
+		body string,
+	) error
+	DeleteComment(ctx context.Context, actorRef, resourceRef, commentID string) error
+	PurgeResource(ctx context.Context, resourceRef string) error
 }

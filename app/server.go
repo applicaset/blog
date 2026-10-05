@@ -20,6 +20,7 @@ func Routes(cfg *Config, svc *services, logger *slog.Logger) (http.Handler, erro
 		Auth:    directAuth{service: svc.auth, pages: authHandler},
 		Authz:   directAuthz{service: svc.authz},
 		Content: directContent{service: svc.content},
+		Discuss: directDiscuss{service: svc.discuss},
 	}, web.Config{
 		SessionCookieName: cfg.SessionCookieName,
 		SecureCookies:     cfg.SecureCookies,

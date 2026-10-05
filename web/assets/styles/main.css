@@ -2,3 +2,7 @@
 @import "@buildset/ui/theme.css";
 
 @source "../../templates";
+
+.blog-comment {
+    margin-left: calc(var(--depth, 0) * 1.25rem);
+}

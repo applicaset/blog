@@ -16,6 +16,8 @@ import (
 	contentpostgres "github.com/applicaset/blog/content/postgres"
 	contentsqlite "github.com/applicaset/blog/content/sqlite"
 	"github.com/applicaset/blog/web"
+	"github.com/applicaset/discuss"
+	discussapp "github.com/applicaset/discuss/app"
 	"github.com/applicaset/pkg/storage"
 )
 
@@ -29,6 +31,7 @@ type services struct {
 	authPages *authui.Handler
 	authz     *authz.Service
 	content   *content.Service
+	discuss   *discuss.Service
 }
 
 func newServices(
@@ -99,11 +102,21 @@ func newServices(
 		return nil, fmt.Errorf("build content repository: %w", err)
 	}
 
+	discussService, err := discussapp.Build(
+		ctx,
+		cfg.Database.Driver,
+		&storage.Handle{SQL: stores.Discuss},
+	)
+	if err != nil {
+		return nil, fmt.Errorf("build discuss service: %w", err)
+	}
+
 	return &services{
 		auth:      authService,
 		authPages: authPages,
 		authz:     authzService,
 		content:   content.NewService(postRepo),
+		discuss:   discussService,
 	}, nil
 }
 

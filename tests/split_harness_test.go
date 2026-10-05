@@ -20,6 +20,7 @@ import (
 	contentapp "github.com/applicaset/blog/content/app"
 	webapp "github.com/applicaset/blog/web/app"
 	"github.com/applicaset/blog/web/remote"
+	discussapp "github.com/applicaset/discuss/app"
 	"github.com/applicaset/pkg/config"
 	"github.com/applicaset/pkg/mail"
 	"github.com/applicaset/pkg/serve"
@@ -30,7 +31,7 @@ import (
 // blogPath is where the gateway mounts the blog, as the Caddyfile does.
 const blogPath = "/blog"
 
-// newSplitHarness boots the four services behind a proxy with the gateway's routing, so the browser
+// newSplitHarness boots the five services behind a proxy with the gateway's routing, so the browser
 // sees one origin, as in compose. They share one SQLite file, unlike a deployment. That is enough:
 // a split breaks at the boundaries between processes, not in storage.
 func newSplitHarness(t *testing.T) *harness {
@@ -46,8 +47,9 @@ func newSplitHarness(t *testing.T) *harness {
 
 	authzURL := startAuthz(t, logger, database)
 	contentURL := startContent(t, logger, database)
+	discussURL := startDiscuss(t, logger, database)
 	authURL := startAuth(t, logger, database, authzURL)
-	webURL := startWeb(t, logger, authURL, authzURL, contentURL)
+	webURL := startWeb(t, logger, authURL, authzURL, contentURL, discussURL)
 
 	gateway := httptest.NewServer(newGateway(t, authURL, webURL))
 	t.Cleanup(gateway.Close)
@@ -132,6 +134,27 @@ func startContent(t *testing.T, logger *slog.Logger, database storage.Config) st
 	)
 }
 
+func startDiscuss(t *testing.T, logger *slog.Logger, database storage.Config) string {
+	t.Helper()
+
+	service, err := discussapp.New(context.Background(), &discussapp.Config{
+		Port: "8080", ShutdownTimeout: time.Second,
+		Database: database,
+	}, logger)
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = service.Close() })
+
+	return startServer(
+		t,
+		serve.Options{
+			Name:   "discuss",
+			Logger: logger,
+			Routes: service.Routes(),
+			Ready:  service.Ping,
+		},
+	)
+}
+
 func startAuth(t *testing.T, logger *slog.Logger, database storage.Config, authzURL string) string {
 	t.Helper()
 
@@ -158,7 +181,11 @@ func startAuth(t *testing.T, logger *slog.Logger, database storage.Config, authz
 	})
 }
 
-func startWeb(t *testing.T, logger *slog.Logger, authURL, authzURL, contentURL string) string {
+func startWeb(
+	t *testing.T,
+	logger *slog.Logger,
+	authURL, authzURL, contentURL, discussURL string,
+) string {
 	t.Helper()
 
 	site, err := webapp.New(&webapp.Config{
@@ -169,6 +196,7 @@ func startWeb(t *testing.T, logger *slog.Logger, authURL, authzURL, contentURL s
 		AuthURL:     authURL,
 		AuthzURL:    authzURL,
 		ContentURL:  contentURL,
+		DiscussURL:  discussURL,
 		HTTPTimeout: 5 * time.Second,
 		URLs:        remote.DefaultURLs(),
 	}, logger)

@@ -20,8 +20,13 @@ func NewAuthz(client *authzclient.Client) *Authz {
 
 // Can answers false on any failure. The site treats a non-nil error as "do not continue", so a
 // failure here can never widen access.
-func (a *Authz) Can(ctx context.Context, subject, action, resource string) (bool, error) {
-	allowed, err := a.client.Can(ctx, subject, action, resource)
+func (a *Authz) Can(
+	ctx context.Context,
+	subject string,
+	groups []string,
+	action, resource string,
+) (bool, error) {
+	allowed, err := a.client.CanWithGroups(ctx, subject, groups, action, resource)
 
 	return allowed, translate(err)
 }

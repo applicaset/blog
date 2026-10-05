@@ -12,7 +12,7 @@ func (s *Server) can(ctx context.Context, user *User, action, resource string) (
 		return false, nil
 	}
 
-	return s.deps.Authz.Can(ctx, user.Ref, action, resource)
+	return s.deps.Authz.Can(ctx, user.Ref, user.Groups, action, resource)
 }
 
 // requirePermission reports whether to continue. A denial on an administration page is a 403; on a

@@ -4,7 +4,9 @@ import (
 	"context"
 	"html/template"
 	"slices"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/applicaset/blog/web"
 )
@@ -99,8 +101,20 @@ type fakeAuthz struct {
 	purged      []string
 }
 
-func (f *fakeAuthz) Can(_ context.Context, subject, action, resource string) (bool, error) {
-	return f.permissions[subject+"|"+action+"|"+resource], nil
+// Can allows what the subject or any of its groups was allowed.
+func (f *fakeAuthz) Can(
+	_ context.Context,
+	subject string,
+	groups []string,
+	action, resource string,
+) (bool, error) {
+	for _, holder := range append([]string{subject}, groups...) {
+		if f.permissions[holder+"|"+action+"|"+resource] {
+			return true, nil
+		}
+	}
+
+	return false, nil
 }
 
 func (f *fakeAuthz) Grant(
@@ -256,4 +270,129 @@ func (f *fakeContent) DeletePost(_ context.Context, id string) error {
 
 func (f *fakeContent) RenderBody(_ context.Context, post *web.Post) (template.HTML, error) {
 	return template.HTML("<p>" + template.HTMLEscapeString(post.Body) + "</p>"), nil
+}
+
+// fakeDiscuss keeps the rules the blog relies on: only the author changes a comment, only on its
+// own resource, and only over the latest revision.
+type fakeDiscuss struct {
+	comments []web.Comment
+	// resources maps a comment id to the resource it belongs to.
+	resources map[string]string
+	purged    []string
+	failPurge error
+}
+
+func (f *fakeDiscuss) ListComments(_ context.Context, resourceRef string) ([]web.Comment, error) {
+	var comments []web.Comment
+
+	for _, comment := range f.comments {
+		if f.resources[comment.ID] == resourceRef {
+			comments = append(comments, comment)
+		}
+	}
+
+	return comments, nil
+}
+
+func (f *fakeDiscuss) AddComment(
+	_ context.Context,
+	actorRef, resourceRef, parentID, body string,
+) (*web.Comment, error) {
+	if strings.TrimSpace(body) == "" {
+		return nil, web.NewError(web.ErrInvalidInput, "Write a comment first.")
+	}
+
+	if parentID != "" {
+		parent := f.find(parentID)
+		if parent == nil || f.resources[parentID] != resourceRef || parent.DeletedAt != nil {
+			return nil, web.NewError(web.ErrNotFound, "That comment could not be found.")
+		}
+	}
+
+	comment := web.Comment{
+		ID:        "comment-" + strconv.Itoa(len(f.comments)+1),
+		ParentID:  parentID,
+		AuthorRef: actorRef,
+		Body:      body,
+	}
+
+	f.comments = append(f.comments, comment)
+	f.resources[comment.ID] = resourceRef
+
+	return &comment, nil
+}
+
+func (f *fakeDiscuss) EditComment(
+	_ context.Context,
+	actorRef, resourceRef, commentID string,
+	revision int,
+	body string,
+) error {
+	if strings.TrimSpace(body) == "" {
+		return web.NewError(web.ErrInvalidInput, "Write a comment first.")
+	}
+
+	comment, err := f.change(actorRef, resourceRef, commentID)
+	if err != nil {
+		return err
+	}
+
+	if comment.Revision != revision {
+		return web.NewError(web.ErrConflict, "This comment changed somewhere else.")
+	}
+
+	comment.Body = body
+	comment.EditedAt = new(time.Now())
+	comment.Revision++
+
+	return nil
+}
+
+func (f *fakeDiscuss) DeleteComment(
+	_ context.Context,
+	actorRef, resourceRef, commentID string,
+) error {
+	comment, err := f.change(actorRef, resourceRef, commentID)
+	if err != nil {
+		return err
+	}
+
+	comment.Body = ""
+	comment.DeletedAt = new(time.Now())
+	comment.Revision++
+
+	return nil
+}
+
+func (f *fakeDiscuss) PurgeResource(_ context.Context, resourceRef string) error {
+	if f.failPurge != nil {
+		return f.failPurge
+	}
+
+	f.purged = append(f.purged, resourceRef)
+
+	return nil
+}
+
+func (f *fakeDiscuss) change(actorRef, resourceRef, commentID string) (*web.Comment, error) {
+	comment := f.find(commentID)
+	if comment == nil || f.resources[commentID] != resourceRef || comment.DeletedAt != nil {
+		return nil, web.NewError(web.ErrNotFound, "That comment could not be found.")
+	}
+
+	if comment.AuthorRef != actorRef {
+		return nil, web.NewError(web.ErrForbidden, "Only its author can change that comment.")
+	}
+
+	return comment, nil
+}
+
+func (f *fakeDiscuss) find(id string) *web.Comment {
+	for i := range f.comments {
+		if f.comments[i].ID == id {
+			return &f.comments[i]
+		}
+	}
+
+	return nil
 }

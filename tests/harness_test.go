@@ -120,7 +120,7 @@ func newMonoHarness(t *testing.T) *harness {
 // topologyEnvVar chooses which arrangements the scenarios run against.
 const topologyEnvVar = "E2E_TOPOLOGY"
 
-// forEachTopology runs a scenario against the single binary and against the four services behind a
+// forEachTopology runs a scenario against the single binary and against the five services behind a
 // gateway. One set of tests checks that the split behaves the same.
 func forEachTopology(t *testing.T, scenario func(*testing.T, *harness)) {
 	t.Helper()

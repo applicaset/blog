@@ -10,15 +10,16 @@ import (
 // The actions this site asks about. The authorization service stores these strings and attaches no
 // meaning to them.
 const (
-	ActionPostCreate  = "post.create"
-	ActionPostRead    = "post.read"
-	ActionPostUpdate  = "post.update"
-	ActionPostDelete  = "post.delete"
-	ActionPostPublish = "post.publish"
-	ActionUserRead    = "user.read"
-	ActionUserCreate  = action.UserCreate
-	ActionUserDelete  = "user.delete"
-	ActionRoleAssign  = "role.assign"
+	ActionPostCreate    = "post.create"
+	ActionPostRead      = "post.read"
+	ActionPostUpdate    = "post.update"
+	ActionPostDelete    = "post.delete"
+	ActionPostPublish   = "post.publish"
+	ActionCommentCreate = "comment.create"
+	ActionUserRead      = "user.read"
+	ActionUserCreate    = action.UserCreate
+	ActionUserDelete    = "user.delete"
+	ActionRoleAssign    = "role.assign"
 )
 
 // ownershipActions are granted to whoever creates a post, so ownership stays a matter of grants

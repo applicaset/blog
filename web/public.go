@@ -3,6 +3,7 @@ package web
 import (
 	"errors"
 	"html/template"
+	"log/slog"
 	"net/http"
 )
 
@@ -13,6 +14,15 @@ type indexContent struct {
 type postContent struct {
 	Post Post
 	Body template.HTML
+	// URL is the post's own address, the base of every comment form.
+	URL string
+	// Discussion is false on a post that is not published, which shows no comments.
+	Discussion   bool
+	Comments     []commentView
+	CanComment   bool
+	SignedIn     bool
+	SignInURL    string
+	CommentError string
 }
 
 func (s *Server) index(w http.ResponseWriter, r *http.Request) {
@@ -85,6 +95,17 @@ func (s *Server) showPost(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	s.renderPost(w, r, http.StatusOK, post, "")
+}
+
+// renderPost shows the post with its discussion. commentError is a refused comment's sentence.
+func (s *Server) renderPost(
+	w http.ResponseWriter,
+	r *http.Request,
+	status int,
+	post *Post,
+	commentError string,
+) {
 	body, err := s.deps.Content.RenderBody(r.Context(), post)
 	if err != nil {
 		s.renderInternalError(w, r, err, "render post body")
@@ -92,8 +113,43 @@ func (s *Server) showPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data := s.newLayoutData(r, post.Title)
-	data.Content = postContent{Post: *post, Body: body}
+	page := postContent{
+		Post:         *post,
+		Body:         body,
+		URL:          s.path("/posts/" + post.ID),
+		CommentError: commentError,
+	}
 
-	s.render(w, r, http.StatusOK, "post.gohtml", data)
+	if post.Status == StatusPublished {
+		comments, err := s.deps.Discuss.ListComments(r.Context(), post.Ref)
+		if err != nil {
+			s.renderInternalError(w, r, err, "list comments")
+
+			return
+		}
+
+		user, _ := userFromContext(r.Context())
+
+		viewerRef := ""
+		if user != nil {
+			viewerRef = user.Ref
+		}
+
+		// A failure to answer hides the form rather than blocking the post.
+		canComment, err := s.can(r.Context(), user, ActionCommentCreate, post.Ref)
+		if err != nil {
+			s.logger.WarnContext(r.Context(), "check comment permission", slog.Any("error", err))
+		}
+
+		page.Discussion = true
+		page.Comments = buildThread(comments, s.commentAuthors(r.Context(), comments), viewerRef)
+		page.CanComment = canComment
+		page.SignedIn = user != nil
+		page.SignInURL = s.deps.Auth.LoginURL(page.URL)
+	}
+
+	data := s.newLayoutData(r, post.Title)
+	data.Content = page
+
+	s.render(w, r, status, "post.gohtml", data)
 }

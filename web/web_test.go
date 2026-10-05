@@ -32,6 +32,7 @@ type harness struct {
 	auth    *fakeAuth
 	authz   *fakeAuthz
 	content *fakeContent
+	discuss *fakeDiscuss
 }
 
 func newHarness(t *testing.T) *harness {
@@ -70,14 +71,22 @@ func newHarnessAt(t *testing.T, basePath string) *harness {
 		},
 	}}
 
+	discuss := &fakeDiscuss{resources: map[string]string{}}
+
 	server, err := web.New(
-		web.Dependencies{Auth: auth, Authz: authz, Content: content},
+		web.Dependencies{Auth: auth, Authz: authz, Content: content, Discuss: discuss},
 		web.Config{SessionCookieName: sessionCookieName, SiteTitle: "Blog", BasePath: basePath},
 		slog.New(slog.DiscardHandler),
 	)
 	require.NoError(t, err)
 
-	return &harness{handler: server.Handler(), auth: auth, authz: authz, content: content}
+	return &harness{
+		handler: server.Handler(),
+		auth:    auth,
+		authz:   authz,
+		content: content,
+		discuss: discuss,
+	}
 }
 
 func (h *harness) request(
@@ -222,6 +231,25 @@ func TestDeletingAPostRemovesItsGrants(t *testing.T) {
 	require.Equal(t, http.StatusSeeOther, response.Code)
 	assert.Equal(t, []string{draftID}, h.content.deleted)
 	assert.Equal(t, []string{draftRef}, h.authz.purged, "grants must not outlive the resource")
+	assert.Equal(t, []string{draftRef}, h.discuss.purged, "comments must not outlive the resource")
+}
+
+// The post goes last, so a failure to remove its thread leaves the post in place to retry.
+func TestDeletingAPostKeepsItWhenItsCommentsCannotBeRemoved(t *testing.T) {
+	h := newHarness(t)
+	h.authz.allow(adaRef, web.ActionPostDelete, draftRef)
+	h.discuss.failPurge = assertAnError{}
+
+	response := h.request(
+		t,
+		http.MethodPost,
+		"/admin/posts/"+draftID+"/delete",
+		adaToken,
+		url.Values{},
+	)
+
+	assert.Equal(t, http.StatusInternalServerError, response.Code)
+	assert.Empty(t, h.content.deleted)
 }
 
 // An identity service that cannot be reached must never be read as "this visitor is anonymous".

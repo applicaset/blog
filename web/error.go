@@ -33,8 +33,8 @@ func ErrorFromCode(code httpx.Code, message string) error {
 	case httpx.CodeConflict:
 		return NewError(ErrConflict, message)
 	case httpx.CodeForbidden:
-		// No service the blog calls refuses by role; the blog asks authz itself.
-		return nil
+		// Only discuss refuses, and only by authorship. Roles are the blog's own question to authz.
+		return NewError(ErrForbidden, message)
 	default:
 		return nil
 	}

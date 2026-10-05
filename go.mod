@@ -4,9 +4,10 @@ go 1.27.1
 
 require (
 	github.com/Masterminds/squirrel v1.5.4
-	github.com/applicaset/auth v0.0.0-20261002001217-11026f3e143f
-	github.com/applicaset/authz v0.0.0-20261002001103-633493ea004c
-	github.com/applicaset/pkg v0.0.0-20261002000949-90941847c511
+	github.com/applicaset/auth v0.0.0-20261005182627-fc146fbe1e0e
+	github.com/applicaset/authz v0.0.0-20261005182526-495d4ee8104c
+	github.com/applicaset/discuss v0.0.0-20261005182703-4610d3f3248e
+	github.com/applicaset/pkg v0.0.0-20261005165400-6451a0aeeb10
 	github.com/nasermirzaei89/env v1.8.0
 	github.com/playwright-community/playwright-go v0.6000.0
 	github.com/stretchr/testify v1.12.1

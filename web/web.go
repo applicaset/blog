@@ -33,6 +33,7 @@ type Dependencies struct {
 	Auth    Auth
 	Authz   Authz
 	Content Content
+	Discuss Discuss
 }
 
 type Server struct {
@@ -43,7 +44,8 @@ type Server struct {
 }
 
 func New(deps Dependencies, config Config, logger *slog.Logger) (*Server, error) {
-	if deps.Auth == nil || deps.Authz == nil || deps.Content == nil {
+	if deps.Auth == nil || deps.Authz == nil || deps.Content == nil ||
+		deps.Discuss == nil {
 		return nil, fmt.Errorf("%w: every dependency must be provided", errMissingDependency)
 	}
 
@@ -78,6 +80,10 @@ func (s *Server) pages() http.Handler {
 
 	mux.HandleFunc("GET /{$}", s.index)
 	mux.HandleFunc("GET /posts/{id}", s.showPost)
+	mux.HandleFunc("POST /posts/{id}/comments", s.addComment)
+	mux.HandleFunc("POST /posts/{id}/comments/{comment}", s.editComment)
+	mux.HandleFunc("GET /posts/{id}/comments/{comment}/delete", s.confirmDeleteComment)
+	mux.HandleFunc("POST /posts/{id}/comments/{comment}/delete", s.deleteComment)
 	mux.HandleFunc("GET /account", s.accountForm)
 	mux.HandleFunc("POST /account", s.accountSubmit)
 

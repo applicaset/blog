@@ -12,6 +12,8 @@ import (
 	"github.com/applicaset/blog/content"
 	contenthttpapi "github.com/applicaset/blog/content/httpapi"
 	"github.com/applicaset/blog/web"
+	"github.com/applicaset/discuss"
+	discusshttpapi "github.com/applicaset/discuss/httpapi"
 	"github.com/applicaset/pkg/httpx"
 	"github.com/applicaset/pkg/ref"
 )
@@ -30,7 +32,10 @@ func (a directAuth) ResolveSession(ctx context.Context, token string) (*web.User
 		return nil, translateAuthError(err)
 	}
 
-	return toWebUser(user), nil
+	resolved := toWebUser(user)
+	resolved.Groups = user.SessionGroups()
+
+	return resolved, nil
 }
 
 func (a directAuth) GetUserByRef(ctx context.Context, userRef string) (*web.User, error) {
@@ -99,8 +104,13 @@ type directAuthz struct {
 	service *authz.Service
 }
 
-func (a directAuthz) Can(ctx context.Context, subject, action, resource string) (bool, error) {
-	allowed, err := a.service.Can(ctx, subject, action, resource)
+func (a directAuthz) Can(
+	ctx context.Context,
+	subject string,
+	groups []string,
+	action, resource string,
+) (bool, error) {
+	allowed, err := a.service.CanWithGroups(ctx, subject, groups, action, resource)
 
 	return allowed, translateAuthzError(err)
 }
@@ -240,6 +250,63 @@ func (a directContent) RenderBody(_ context.Context, post *web.Post) (template.H
 	return rendered, nil
 }
 
+type directDiscuss struct {
+	service *discuss.Service
+}
+
+func (a directDiscuss) ListComments(
+	ctx context.Context,
+	resourceRef string,
+) ([]web.Comment, error) {
+	comments, err := a.service.ListComments(ctx, resourceRef)
+	if err != nil {
+		return nil, translateDiscussError(err)
+	}
+
+	converted := make([]web.Comment, 0, len(comments))
+	for _, comment := range comments {
+		converted = append(converted, *toWebComment(&comment))
+	}
+
+	return converted, nil
+}
+
+func (a directDiscuss) AddComment(
+	ctx context.Context,
+	actorRef, resourceRef, parentID, body string,
+) (*web.Comment, error) {
+	comment, err := a.service.AddComment(ctx, actorRef, resourceRef, parentID, body)
+	if err != nil {
+		return nil, translateDiscussError(err)
+	}
+
+	return toWebComment(comment), nil
+}
+
+func (a directDiscuss) EditComment(
+	ctx context.Context,
+	actorRef, resourceRef, commentID string,
+	revision int,
+	body string,
+) error {
+	_, err := a.service.EditComment(ctx, actorRef, resourceRef, commentID, revision, body)
+
+	return translateDiscussError(err)
+}
+
+func (a directDiscuss) DeleteComment(
+	ctx context.Context,
+	actorRef, resourceRef, commentID string,
+) error {
+	_, err := a.service.DeleteComment(ctx, actorRef, resourceRef, commentID)
+
+	return translateDiscussError(err)
+}
+
+func (a directDiscuss) PurgeResource(ctx context.Context, resourceRef string) error {
+	return translateDiscussError(a.service.PurgeResource(ctx, resourceRef))
+}
+
 func toWebUser(user *auth.User) *web.User {
 	return &web.User{Ref: user.Ref(), ID: user.ID, Username: user.Username, Name: user.Name}
 }
@@ -259,6 +326,19 @@ func toWebPost(post *content.Post) *web.Post {
 	}
 }
 
+func toWebComment(comment *discuss.Comment) *web.Comment {
+	return &web.Comment{
+		ID:        comment.ID,
+		ParentID:  comment.ParentID,
+		AuthorRef: comment.AuthorRef,
+		Body:      comment.Body,
+		Revision:  comment.Revision,
+		CreatedAt: comment.CreatedAt,
+		EditedAt:  comment.EditedAt,
+		DeletedAt: comment.DeletedAt,
+	}
+}
+
 // The translators below use the same classifiers as the HTTP APIs. Both topologies turn a failure
 // into the same sentinel and sentence. Anything unclassified passes through as a system failure.
 
@@ -272,6 +352,10 @@ func translateContentError(err error) error {
 
 func translateAuthzError(err error) error {
 	return translate(err, authzhttpapi.Classify)
+}
+
+func translateDiscussError(err error) error {
+	return translate(err, discusshttpapi.Classify)
 }
 
 func translate(err error, classify func(error) (httpx.Code, string, bool)) error {

@@ -220,11 +220,17 @@ func (s *Server) deletePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Grants go first because two services cannot share a transaction. A post without grants can
-	// still be deleted by an administrator through their role. The other order leaves stale grants
-	// that a reused identifier would eventually match.
+	// Grants, then comments, then the post, because three services cannot share a transaction. A
+	// failure leaves the post in place to retry: an administrator can still delete it through their
+	// role. The other order leaves grants and threads that a reused identifier would match.
 	if err := s.deps.Authz.PurgeResource(r.Context(), post.Ref); err != nil {
 		s.renderInternalError(w, r, err, "purge post grants")
+
+		return
+	}
+
+	if err := s.deps.Discuss.PurgeResource(r.Context(), post.Ref); err != nil {
+		s.renderInternalError(w, r, err, "purge post comments")
 
 		return
 	}
