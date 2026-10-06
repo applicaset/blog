@@ -5,7 +5,7 @@ go 1.27.1
 require (
 	github.com/Masterminds/squirrel v1.5.4
 	github.com/applicaset/auth v0.0.0-20261005182627-fc146fbe1e0e
-	github.com/applicaset/authz v0.0.0-20261005182526-495d4ee8104c
+	github.com/applicaset/authz v0.0.0-20261006002810-0c60b2c04da4
 	github.com/applicaset/discuss v0.0.0-20261005182703-4610d3f3248e
 	github.com/applicaset/pkg v0.0.0-20261005165400-6451a0aeeb10
 	github.com/nasermirzaei89/env v1.8.0

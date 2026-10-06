@@ -112,8 +112,8 @@ github.com/alingse/nilnesserr v0.2.0 h1:raLem5KG7EFVb4UIDAXgrv3N2JIaffeKNtcEXkEW
 github.com/alingse/nilnesserr v0.2.0/go.mod h1:1xJPrXonEtX7wyTq8Dytns5P2hNzoWymVUIaKm4HNFg=
 github.com/applicaset/auth v0.0.0-20261005182627-fc146fbe1e0e h1:dckpcn13EPmHWbf1M25GjWb7mJHBUahOnJ7y0jdrEDc=
 github.com/applicaset/auth v0.0.0-20261005182627-fc146fbe1e0e/go.mod h1:aMAxSFXBwsEOC78UVZcPgDTS0yOdXT9QDi8vhgyls34=
-github.com/applicaset/authz v0.0.0-20261005182526-495d4ee8104c h1:DKk5uRYfJLLHaXjkugJHn7HzWg391B0cF0gRoAr62ZA=
-github.com/applicaset/authz v0.0.0-20261005182526-495d4ee8104c/go.mod h1:pYkGcHggWR98XckVnLxYQ9dJq8tvVsVqDsK2SF0mGLo=
+github.com/applicaset/authz v0.0.0-20261006002810-0c60b2c04da4 h1:6fiijsJJ5u+M1IShMW4/COUbTHnCDoFUiEpcBVMrykk=
+github.com/applicaset/authz v0.0.0-20261006002810-0c60b2c04da4/go.mod h1:pYkGcHggWR98XckVnLxYQ9dJq8tvVsVqDsK2SF0mGLo=
 github.com/applicaset/discuss v0.0.0-20261005182703-4610d3f3248e h1:i945WQZOtaep1nVAl3A3ZkZXcBIczlvcYv9ZN7R9J9k=
 github.com/applicaset/discuss v0.0.0-20261005182703-4610d3f3248e/go.mod h1:7giU0R4z+Xi3b4k72NYR6+rpNPsLEPdhPddge61+XCg=
 github.com/applicaset/pkg v0.0.0-20261005165400-6451a0aeeb10 h1:RCDejs8xKDLZthOxRjLtwGgQgqXhUQWgPVuy9sFz5QI=
