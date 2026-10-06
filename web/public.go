@@ -95,16 +95,18 @@ func (s *Server) showPost(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	s.renderPost(w, r, http.StatusOK, post, "")
+	s.renderPost(w, r, http.StatusOK, post, "", nil)
 }
 
-// renderPost shows the post with its discussion. commentError is a refused comment's sentence.
+// renderPost shows the post with its discussion. commentError is a refused comment's sentence,
+// and edit, when set, shows one comment as its edit form.
 func (s *Server) renderPost(
 	w http.ResponseWriter,
 	r *http.Request,
 	status int,
 	post *Post,
 	commentError string,
+	edit *commentEdit,
 ) {
 	body, err := s.deps.Content.RenderBody(r.Context(), post)
 	if err != nil {
@@ -146,6 +148,14 @@ func (s *Server) renderPost(
 		page.CanComment = canComment
 		page.SignedIn = user != nil
 		page.SignInURL = s.deps.Auth.LoginURL(page.URL)
+	}
+
+	if edit != nil {
+		if err := openEdit(page.Comments, edit); err != nil {
+			s.renderCommentFailure(w, r, post, err, "open comment edit")
+
+			return
+		}
 	}
 
 	data := s.newLayoutData(r, post.Title)

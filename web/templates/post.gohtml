@@ -20,12 +20,22 @@
                                 {{ if and $c.EditedAt (not $c.DeletedAt) }}<span>edited</span>{{ end }}
                                 {{ with $c.ReplyingTo }}<span>replying to {{ . }}</span>{{ end }}
                             </header>
-                            {{ if $c.DeletedAt }}
+                            {{ if $c.Edit }}
+                                <form method="post" action="{{ $page.URL }}/comments/{{ $c.ID }}" class="flex flex-col gap-2">
+                                    <input type="hidden" name="revision" value="{{ $c.Edit.Revision }}">
+                                    <textarea name="body" rows="3" dir="auto" maxlength="10000" required autofocus class="as-input" aria-label="Edit comment">{{ $c.Edit.Body }}</textarea>
+                                    {{ with $c.Edit.Error }}<p role="alert" class="as-alert variant-danger">{{ . }}</p>{{ end }}
+                                    <div class="flex flex-wrap items-start gap-2">
+                                        <button type="submit" class="as-button size-sm">Save</button>
+                                        <a href="{{ $page.URL }}#comment-{{ $c.ID }}" hx-get="{{ $page.URL }}" hx-target="#comment-{{ $c.ID }}" hx-select="#comment-{{ $c.ID }}" hx-swap="outerHTML" class="as-button size-sm variant-outlined">Cancel</a>
+                                    </div>
+                                </form>
+                            {{ else if $c.DeletedAt }}
                                 <p class="text-muted italic">This comment was deleted.</p>
                             {{ else }}
                                 <p class="whitespace-pre-wrap" dir="auto">{{ $c.Body }}</p>
                                 {{ if or $page.CanComment $c.Mine }}
-                                    <div class="flex flex-wrap gap-2">
+                                    <div class="flex flex-wrap items-start gap-2">
                                         {{ if $page.CanComment }}
                                             <details>
                                                 <summary class="as-button size-sm variant-outlined">Reply</summary>
@@ -37,14 +47,7 @@
                                             </details>
                                         {{ end }}
                                         {{ if $c.Mine }}
-                                            <details>
-                                                <summary class="as-button size-sm variant-outlined">Edit</summary>
-                                                <form method="post" action="{{ $page.URL }}/comments/{{ $c.ID }}" class="mt-2 flex flex-col gap-2">
-                                                    <input type="hidden" name="revision" value="{{ $c.Revision }}">
-                                                    <textarea name="body" rows="3" dir="auto" maxlength="10000" required class="as-input" aria-label="Edit comment">{{ $c.Body }}</textarea>
-                                                    <button type="submit" class="as-button size-sm self-start">Save</button>
-                                                </form>
-                                            </details>
+                                            <a href="{{ $page.URL }}/comments/{{ $c.ID }}/edit" hx-get="{{ $page.URL }}/comments/{{ $c.ID }}/edit" hx-target="#comment-{{ $c.ID }}" hx-select="#comment-{{ $c.ID }}" hx-swap="outerHTML" class="as-button size-sm variant-outlined">Edit</a>
                                             <a href="{{ $page.URL }}/comments/{{ $c.ID }}/delete" class="as-button size-sm variant-outlined is-danger">Delete</a>
                                         {{ end }}
                                     </div>

@@ -24,6 +24,46 @@ type commentView struct {
 	VisualDepth int
 	// ReplyingTo is set for a reply shown past the deepest indent.
 	ReplyingTo string
+	// Edit is set on the comment shown as its edit form instead of its body.
+	Edit *commentEdit
+}
+
+// commentEdit is the edit form's state: the comment's own text when it opens, or what the author
+// sent when it comes back refused.
+type commentEdit struct {
+	CommentID string
+	Body      string
+	Revision  int
+	Error     string
+}
+
+// openEdit puts edit on its comment, with the answers discuss would give to a change it refuses.
+func openEdit(rows []commentView, edit *commentEdit) error {
+	for i := range rows {
+		if rows[i].ID != edit.CommentID {
+			continue
+		}
+
+		if rows[i].DeletedAt != nil {
+			break
+		}
+
+		if !rows[i].Mine {
+			return NewError(ErrForbidden, "Only its author can change that comment.")
+		}
+
+		// A form that was not refused opens on the saved text.
+		if edit.Error == "" {
+			edit.Body = rows[i].Body
+			edit.Revision = rows[i].Revision
+		}
+
+		rows[i].Edit = edit
+
+		return nil
+	}
+
+	return NewError(ErrNotFound, "That comment could not be found.")
 }
 
 // buildThread lays out comments, oldest first, with each reply under its parent. names maps author
@@ -163,6 +203,19 @@ func (s *Server) addComment(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, s.commentURL(post.ID, comment.ID), http.StatusSeeOther)
 }
 
+func (s *Server) editCommentForm(w http.ResponseWriter, r *http.Request) {
+	if _, ok := s.requireUser(w, r); !ok {
+		return
+	}
+
+	post, ok := s.publishedPost(w, r)
+	if !ok {
+		return
+	}
+
+	s.renderPost(w, r, http.StatusOK, post, "", &commentEdit{CommentID: r.PathValue("comment")})
+}
+
 func (s *Server) editComment(w http.ResponseWriter, r *http.Request) {
 	user, ok := s.requireUser(w, r)
 	if !ok || !s.parseForm(w, r) {
@@ -182,6 +235,7 @@ func (s *Server) editComment(w http.ResponseWriter, r *http.Request) {
 	}
 
 	commentID := r.PathValue("comment")
+	body := r.PostFormValue("body")
 
 	if err := s.deps.Discuss.EditComment(
 		r.Context(),
@@ -189,8 +243,20 @@ func (s *Server) editComment(w http.ResponseWriter, r *http.Request) {
 		post.Ref,
 		commentID,
 		revision,
-		r.PostFormValue("body"),
+		body,
 	); err != nil {
+		if errors.Is(err, ErrInvalidInput) {
+			// The author's text and revision go back into the form, so a fix keeps the stale check.
+			s.renderPost(w, r, http.StatusBadRequest, post, "", &commentEdit{
+				CommentID: commentID,
+				Body:      body,
+				Revision:  revision,
+				Error:     err.Error(),
+			})
+
+			return
+		}
+
 		s.renderCommentFailure(w, r, post, err, "edit comment")
 
 		return
@@ -297,7 +363,7 @@ func (s *Server) renderCommentFailure(
 ) {
 	switch {
 	case errors.Is(err, ErrInvalidInput):
-		s.renderPost(w, r, http.StatusBadRequest, post, err.Error())
+		s.renderPost(w, r, http.StatusBadRequest, post, err.Error(), nil)
 	case errors.Is(err, ErrNotFound):
 		s.renderError(w, r, http.StatusNotFound, err.Error())
 	case errors.Is(err, ErrForbidden):

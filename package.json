@@ -2,10 +2,15 @@
     "name": "@buildset/blog",
     "private": true,
     "scripts": {
-        "build:css": "tailwindcss -i ./web/assets/styles/main.css -o ./web/static/style.min.css --minify"
+        "build:css": "tailwindcss -i ./web/assets/styles/main.css -o ./web/static/style.min.css --minify",
+        "build:js": "esbuild ./web/assets/js/app.js --bundle --minify --format=iife --target=es2022 --outfile=./web/static/app.min.js"
+    },
+    "dependencies": {
+        "htmx.org": "4.0.0"
     },
     "devDependencies": {
         "@buildset/ui": "github:applicaset/ui#3fa01f9be7d6d34f14879238c9377f000619696b",
-        "@tailwindcss/cli": "^4.3.3"
+        "@tailwindcss/cli": "^4.3.3",
+        "esbuild": "0.28.2"
     }
 }

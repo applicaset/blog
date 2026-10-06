@@ -144,6 +144,7 @@ func TestLinksAndRedirectsCarryTheBasePath(t *testing.T) {
 	page := h.request(t, http.MethodGet, "/", "", nil).Body.String()
 	assert.Contains(t, page, `href="/blog/"`)
 	assert.Contains(t, page, `href="/blog/static/style.min.css?v=`)
+	assert.Contains(t, page, `src="/blog/static/app.min.js?v=`)
 	assert.NotContains(t, page, `href="/static/`)
 }
 

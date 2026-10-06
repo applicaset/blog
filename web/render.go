@@ -20,7 +20,13 @@ var templateFiles embed.FS
 //go:embed static/style.min.css
 var stylesheetContent []byte
 
-var stylesheet = asset.New("/static/style.min.css", "text/css; charset=utf-8", stylesheetContent)
+//go:embed static/app.min.js
+var scriptContent []byte
+
+var (
+	stylesheet = asset.New("/static/style.min.css", "text/css; charset=utf-8", stylesheetContent)
+	script     = asset.New("/static/app.min.js", "text/javascript; charset=utf-8", scriptContent)
+)
 
 // Listing every page keeps a typo in a handler a startup problem rather than a runtime one.
 var pageNames = []string{
@@ -49,6 +55,7 @@ type layoutData struct {
 	SiteTitle     string
 	Title         string
 	StylesheetURL string
+	ScriptURL     string
 	CurrentUser   *User
 	LoginURL      string
 	LogoutURL     string
@@ -95,6 +102,7 @@ func (s *Server) newLayoutData(r *http.Request, title string) layoutData {
 		SiteTitle:     s.config.SiteTitle,
 		Title:         title,
 		StylesheetURL: s.path(stylesheet.URL),
+		ScriptURL:     s.path(script.URL),
 		CurrentUser:   user,
 		LoginURL:      s.deps.Auth.LoginURL(s.currentURL(r)),
 		LogoutURL:     s.deps.Auth.LogoutURL(s.path("/")),

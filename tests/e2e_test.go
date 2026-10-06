@@ -167,9 +167,25 @@ func readerDiscussesAPublishedPost(t *testing.T, h *harness) {
 	require.NoError(t, commentText(reply, "And a reply.").WaitFor())
 
 	first = reader.Locator("#comments article").Nth(0)
-	require.NoError(t, first.Locator("summary", playwright.LocatorLocatorOptions{
-		HasText: "Edit",
+	editLink := first.GetByRole("link", playwright.LocatorGetByRoleOptions{Name: "Edit"})
+
+	require.NoError(t, editLink.Click())
+	require.NoError(t, first.GetByLabel("Edit comment").WaitFor())
+	require.NoError(t, first.GetByRole("link", playwright.LocatorGetByRoleOptions{
+		Name: "Cancel",
 	}).Click())
+	require.NoError(t, commentText(first, "Great post.").WaitFor())
+	require.NoError(t, editLink.WaitFor())
+
+	require.NoError(t, editLink.Click())
+	// The script swaps the form in place: the address stays the post's, and the field takes focus.
+	require.NoError(t, first.Locator("textarea:focus").WaitFor())
+	assert.NotContains(t, reader.URL(), "/edit")
+
+	bodies, err := commentText(first, "Great post.").Count()
+	require.NoError(t, err)
+	assert.Zero(t, bodies, "the form takes the place of the comment's text")
+
 	require.NoError(t, first.GetByLabel("Edit comment").Fill("Great post, really."))
 	require.NoError(t, first.GetByRole("button", playwright.LocatorGetByRoleOptions{
 		Name: "Save",

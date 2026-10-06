@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ .Title }}</title>
     <link rel="stylesheet" href="{{ .StylesheetURL }}">
+    {{/* Deferred, so the page renders and works before the script runs, and without it. */}}
+    <script src="{{ .ScriptURL }}" defer></script>
 </head>
 <body>
 <header class="as-header">

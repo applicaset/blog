@@ -67,9 +67,10 @@ func New(deps Dependencies, config Config, logger *slog.Logger) (*Server, error)
 
 // Handler returns the site, wrapped in its session middleware.
 func (s *Server) Handler() http.Handler {
-	// The stylesheet stays outside the session middleware, which would ask auth about every request.
+	// The assets stay outside the session middleware, which would ask auth about every request.
 	root := http.NewServeMux()
 	root.Handle("GET "+stylesheet.Path, stylesheet)
+	root.Handle("GET "+script.Path, script)
 	root.Handle("/", s.withSession(s.pages()))
 
 	return root
@@ -81,6 +82,7 @@ func (s *Server) pages() http.Handler {
 	mux.HandleFunc("GET /{$}", s.index)
 	mux.HandleFunc("GET /posts/{id}", s.showPost)
 	mux.HandleFunc("POST /posts/{id}/comments", s.addComment)
+	mux.HandleFunc("GET /posts/{id}/comments/{comment}/edit", s.editCommentForm)
 	mux.HandleFunc("POST /posts/{id}/comments/{comment}", s.editComment)
 	mux.HandleFunc("GET /posts/{id}/comments/{comment}/delete", s.confirmDeleteComment)
 	mux.HandleFunc("POST /posts/{id}/comments/{comment}/delete", s.deleteComment)

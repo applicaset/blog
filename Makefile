@@ -52,10 +52,11 @@ test: ## Run the tests
 	@which $(NPM_CMD) > /dev/null || (echo "Install Node.js from https://nodejs.org/en/download" && exit 1)
 
 .PHONY: dep
-dep: .which-npm ## Install the stylesheet build tools
+dep: .which-npm ## Install the stylesheet and script build tools
 	$(NPM_CMD) install
 
-# The built stylesheets are committed and embedded, so go build alone needs no Node.
+# The built stylesheet and script are committed and embedded, so go build alone needs no Node.
 .PHONY: npm-build
-npm-build: .which-npm ## Build the stylesheets
+npm-build: .which-npm ## Build the stylesheet and the script
 	$(NPM_CMD) run build:css
+	$(NPM_CMD) run build:js

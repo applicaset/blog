@@ -174,6 +174,102 @@ func TestAuthorEditsAndDeletesTheirComment(t *testing.T) {
 	assert.NotContains(t, page, "First.")
 }
 
+func TestAuthorOpensTheEditFormInPlaceOfTheComment(t *testing.T) {
+	h := newDiscussionHarness(t)
+	id := h.comment(t, graceName, "", "Frist.")
+	editPath := postPath + "/comments/" + id + "/edit"
+
+	page := h.request(t, http.MethodGet, postPath, graceName, nil).Body.String()
+	assert.Contains(t, page, `<a href="`+editPath+`" hx-get="`+editPath+`"`)
+
+	response := h.request(t, http.MethodGet, editPath, graceName, nil)
+
+	require.Equal(t, http.StatusOK, response.Code)
+	body := response.Body.String()
+	assert.Contains(t, body, "Public.")
+	assert.Contains(t, body, `id="comment-`+id+`" class="as-card blog-comment`)
+	assert.Contains(t, body, `action="`+postPath+`/comments/`+id+`"`)
+	assert.Contains(t, body, `<input type="hidden" name="revision" value="0">`)
+	assert.Contains(
+		t,
+		body,
+		`autofocus class="as-input" aria-label="Edit comment">Frist.</textarea>`,
+	)
+	assert.Contains(t, body, `<a href="`+postPath+`#comment-`+id+`" hx-get="`+postPath+`"`)
+	assert.NotContains(t, body, `<p class="whitespace-pre-wrap" dir="auto">Frist.</p>`)
+	assert.NotContains(t, body, `/delete"`, "the form replaces the comment's actions")
+}
+
+func TestOnlyTheAuthorOpensTheEditForm(t *testing.T) {
+	h := newDiscussionHarness(t)
+	id := h.comment(t, adaToken, "", "Mine.")
+	gone := h.comment(t, graceName, "", "Gone.")
+	editPath := postPath + "/comments/" + id + "/edit"
+
+	const otherID = "0199bf3c-7a1e-7c2b-9f10-0000000000cc"
+	h.content.posts[otherID] = &web.Post{
+		Ref:    "urn:content:post:" + otherID,
+		ID:     otherID,
+		Title:  "Another post",
+		Status: web.StatusPublished,
+	}
+
+	anonymous := h.request(t, http.MethodGet, editPath, "", nil)
+	require.Equal(t, http.StatusSeeOther, anonymous.Code)
+	assert.Equal(t, "/login?next="+editPath, anonymous.Header().Get("Location"))
+
+	page := h.request(t, http.MethodGet, postPath, graceName, nil).Body.String()
+	assert.NotContains(t, page, editPath)
+
+	assert.Equal(
+		t,
+		http.StatusForbidden,
+		h.request(t, http.MethodGet, editPath, graceName, nil).Code,
+	)
+
+	require.Equal(t, http.StatusSeeOther, h.request(
+		t,
+		http.MethodPost,
+		postPath+"/comments/"+gone+"/delete",
+		graceName,
+		url.Values{},
+	).Code)
+
+	for name, target := range map[string]string{
+		"deleted":      postPath + "/comments/" + gone + "/edit",
+		"unknown":      postPath + "/comments/comment-99/edit",
+		"another post": "/posts/" + otherID + "/comments/" + id + "/edit",
+		"a draft":      "/posts/" + draftID + "/comments/" + id + "/edit",
+	} {
+		assert.Equal(
+			t,
+			http.StatusNotFound,
+			h.request(t, http.MethodGet, target, graceName, nil).Code,
+			name,
+		)
+	}
+}
+
+func TestInvalidEditShowsTheFormWithTheReason(t *testing.T) {
+	h := newDiscussionHarness(t)
+	id := h.comment(t, graceName, "", "Frist.")
+
+	response := h.request(t, http.MethodPost, postPath+"/comments/"+id, graceName, url.Values{
+		"revision": {"0"},
+		"body":     {"   "},
+	})
+
+	assert.Equal(t, http.StatusBadRequest, response.Code)
+	body := response.Body.String()
+	assert.Contains(t, body, `aria-label="Edit comment">   </textarea>`)
+	assert.Contains(
+		t,
+		body,
+		`<p role="alert" class="as-alert variant-danger">Write a comment first.</p>`,
+	)
+	assert.Equal(t, "Frist.", h.discuss.comments[0].Body)
+}
+
 func TestChangingSomeoneElsesCommentIsRefused(t *testing.T) {
 	h := newDiscussionHarness(t)
 	id := h.comment(t, adaToken, "", "Mine.")
